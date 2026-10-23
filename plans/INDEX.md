@@ -1,0 +1,17 @@
+# Uplink plans
+
+Product-requirements docs for Uplink, written before any app code. Each doc is one decision area. Status: `planned` (not started), `draft` (written, not yet reviewed against the set), `done` (reviewed as part of the full set).
+
+| # | Doc | Summary | Status | Updated |
+|---|---|---|---|---|
+| 01 | [Spaced repetition background](01-spaced-repetition-background.md) | Leitner, SM-2, Anki's variant, HLR, Ebisu, FSRS: how each works, evidence, and FSRS on one page. | draft | 2026-10-22 |
+| 02 | Is FSRS the right tool for Uplink? | Recommendation: scheduler choice, cold start, small decks, libraries and licenses. | planned | |
+| 03 | Genuine learning vs rote memorisation | Card types that test understanding, learning-science evidence, product positioning. | planned | |
+| 04 | Core use case: practice → feedback → cards | A practice session's notes become targeted decks via an LLM. End-to-end flow and examples. | planned | |
+| 05 | Card format | Markdown card spec, frontmatter, code, Mermaid, cloze, stable IDs, review state kept apart. | planned | |
+| 06 | v1 mobile app (React Native) | Screens, data model, offline storage, code and Mermaid rendering, Expo vs bare RN. | planned | |
+| 07 | Getting LLM-made cards into the app | MCP server design and alternatives: file sync, HTTP API, GitHub-backed decks. | planned | |
+| 08 | Website and backend (v2) | Accounts, sync, sharing; typed API, services, Postgres, auth, conflicts. | planned | |
+| 09 | Roadmap | Stages, milestones, demos, risks, open decisions. | planned | |
+
+Order follows the dependency chain: scheduler background and choice first, then what the cards should teach, then the format, then the app, then distribution and the roadmap.
