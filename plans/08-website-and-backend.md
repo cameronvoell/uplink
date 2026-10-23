@@ -86,7 +86,7 @@ flowchart LR
 
 The brief asks for Python or TypeScript services. The case for TypeScript is concrete. Doc 05 makes "one parser shared by the CLI and the app" a Must, and doc 02 builds on `ts-fsrs`. A TypeScript backend runs exactly the same `packages/format`, `packages/scheduler`, and `packages/mcp-tools` code as the phone, so a card that parses on the server parses on the device, and a replayed state matches. A Python service would need a second parser and a second scheduler kept in lockstep.
 
-Python's real strengths here are FSRS parameter fitting and data analysis. Fitting is reachable from Node through `@open-spaced-repetition/binding` over `fsrs-rs` (doc 02). **Proposal:** TypeScript everywhere. Add a single Python worker only if the binding fails its license check or its fits disagree with `py-fsrs` on golden data, or when a hosted LLM pipeline (doc 04) wants Python's tooling. The worker interface (read a user's log, write fitted parameters) stays language-neutral either way.
+Python's real strengths here are FSRS parameter fitting and data analysis. Fitting is reachable from Node through `@open-spaced-repetition/binding` over `fsrs-rs` (doc 02). **Proposal:** TypeScript everywhere. The binding is MIT (checked in doc 02). Add a single Python worker only if its fits disagree with `py-fsrs` on golden data, or when a hosted LLM pipeline (doc 04) wants Python's tooling. The worker interface (read a user's log, write fitted parameters) stays language-neutral either way.
 
 Framework: Fastify or Hono, with request and response schemas in Zod that generate the OpenAPI document. The specific choice is not load-bearing.
 

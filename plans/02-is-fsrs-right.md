@@ -47,7 +47,7 @@ Doc 01 shows FSRS predicts recall best among open schedulers. That is not the sa
 
 1. **FSRS-6 via `ts-fsrs` 5.x, pinned.** MIT, no runtime dependencies, ships ESM and CommonJS builds, and implements FSRS-6 with learning steps, relearning steps, fuzz, a maximum interval, `rollback`, `forget`, `reschedule` (rebuild state from a review log), and `get_retrievability`. It is maintained by the same group that maintains the model and the benchmark.
 2. **Default parameters, desired retention 0.9.** In doc 01's benchmark, unfitted FSRS-7 defaults match fitted FSRS-4.5 and beat every fitted non-FSRS model. The current tables have no row for unfitted FSRS-6, so this is an inference for FSRS-6, not a measurement; our own logs will confirm or refute it. Retention is a per-deck setting, from 0.80 to 0.95, with a plain-English hint ("higher means more reviews").
-3. **An append-only review log is the source of truth.** Card scheduling state (due, stability, difficulty, state) is a cache that `reschedule` can rebuild from the log at any time. This is what makes every later change (refitting, FSRS-7, a different model entirely) a recomputation rather than a migration.
+3. **An append-only review log is the source of truth.** Card scheduling state (due, stability, difficulty, state) is a cache that our `replay` (built on `ts-fsrs`'s `reschedule`) can rebuild from the log at any time. Replay is deterministic: `ts-fsrs` seeds its fuzz from the review time, rep count, difficulty, and stability, not from a random source. This is what makes every later change (refitting, FSRS-7, a different model entirely) a recomputation rather than a migration.
 4. **A thin `Scheduler` interface of our own** wraps the library, so the app never imports `ts-fsrs` types directly. `ts-fsrs` main already has a different API for its next major version (`DefaultScheduler`, `newCard`, `review`), so this wrapper pays for itself on the first upgrade.
 5. **No SM-2 phase.** SM-2 would save perhaps half a day once and then cost a migration, and it gives the UI nothing honest to say ("you'll probably remember this" needs a probability). Its one advantage, explainability, is matched by doc 01's one-pager.
 6. **No on-device fitting in v1.** Refit later, and only for users with enough history (see below).
@@ -87,7 +87,7 @@ export interface Scheduler {
   /** Probability of recall right now, 0–1. Null for unseen cards. */
   retrievability(state: CardState | null, now: Date): number | null;
   /** Rebuild state from history: used after refitting, upgrades, or sync. */
-  replay(events: ReviewEvent[]): CardState;
+  replay(events: ReviewEvent[]): CardState | null; // null if every event was undone
 }
 ```
 
@@ -97,7 +97,7 @@ The interface knows nothing about FSRS; a Leitner implementation could satisfy i
 
 ### Cold start
 
-FSRS's first interval comes from the first grade alone. With FSRS-6 defaults, initial stability is about 0.2 days for Again, 1.3 for Hard, 2.3 for Good, and 8.3 for Easy, after short learning steps on the first day. That is sensible for a brand-new deck with no history and needs nothing from us beyond picking learning steps. Default proposal: learning steps 1 min and 10 min, relearning step 10 min, the same as Anki's defaults.
+FSRS's starting memory comes from the first grade alone. FSRS-6's default weights `w0`–`w3` give an initial stability of 0.21 days for Again, 1.29 for Hard, 2.31 for Good, and 8.30 for Easy; same-day learning steps then nudge it. At desired retention 0.9 the interval equals the stability, so a card that graduates with Good comes back in about two days. That is sensible for a brand-new deck with no history and needs nothing from us beyond picking learning steps. Default proposal: learning steps 1 min and 10 min, relearning step 10 min, the defaults in `py-fsrs`.
 
 ### Small decks
 
@@ -105,15 +105,15 @@ FSRS models each card separately, so it does not need a large deck to work. A sm
 
 ### Parameter fitting
 
-- Anki's manual warns that optimising on fewer than a few hundred reviews can make predictions worse, and that refitting monthly is enough.
-- The optimiser lives in `fsrs-rs` (BSD-3-Clause) and reaches JavaScript through `@open-spaced-repetition/binding` (Node native or WebAssembly). It is a training job, not something to run on a phone mid-review.
+- Anki's manual lists "less than a few hundred" reviews as a reason FSRS may underperform, and says optimising "once every month is sufficient".
+- The optimiser lives in `fsrs-rs` (BSD-3-Clause) and reaches JavaScript through `@open-spaced-repetition/binding` (MIT; 0.5.0 on `fsrs` 6.5.0; Node native addons plus a `wasm32-wasi` build). It is a training job, not something to run on a phone mid-review.
 - Plan: v1 never fits. When sync exists (doc 08), the server can fit for users above a threshold (start at 1,000 reviews, tune from data), compare predicted log loss against defaults on held-out reviews, and only ship fitted parameters if they win. Then `replay` recomputes every card.
 
 ### Demos
 
 A five-minute demo cannot show a card coming back in three days. Three features make spacing visible anyway:
 
-1. **Interval labels on the grade buttons** ("Again 1m · Hard 6m · Good 2d · Easy 8d"), straight from `preview`. This is the single best demo of what the scheduler does.
+1. **Interval labels on the grade buttons**, straight from `preview`. For a new card with the default steps they read "Again 1m · Hard 6m · Good 10m · Easy 8d": Hard is the rounded mean of the first two steps, and Easy graduates at S ≈ 8.3 days before fuzz (traced from the `ts-fsrs` source, not executed). This is the single best demo of what the scheduler does.
 2. **A "why is this due?" sheet** showing R, S, and D with the one-line meaning of each (doc 01).
 3. **A seeded demo deck** whose review log already spans weeks, so the stats screen and forgetting curves have something to show. Seeded through the same `replay` path.
 
@@ -124,17 +124,17 @@ A debug-only clock offset is useful for development but should not appear in dem
 FSRS optimises long-term retention at a target probability; it does not know that the learner needs a card on 2 December and less after. Two cheap mitigations, both ordinary FSRS settings:
 
 - raise the deck's desired retention as the date approaches (0.9 → 0.95 shortens intervals);
-- cap the maximum interval so no card is scheduled past the date.
+- set the deck's maximum interval to the days left, updated daily, so no card is scheduled past the date.
 
 A proper deadline mode (choose intervals to maximise recall *on* a date) is a real research problem and goes under Later.
 
 ### FSRS-7
 
-FSRS-7 predicts better (doc 01) and handles same-day reviews properly. As of 2026-10-22 it is the default on the `ts-fsrs` main branch, but the latest npm release is 5.4.2 (1 September), which implements FSRS-6; the next major version also requires Node 24 for its toolchain and changes the API. Adopt it when it is on npm and has been stable for a release or two. Because the review log is the source of truth, the upgrade is: bump the library, swap the wrapper, `replay` every card.
+FSRS-7 predicts better (doc 01) and models same-day reviews directly, where FSRS-6 only approximates them. As of 2026-10-22 it is the default on the `ts-fsrs` main branch, but the latest npm release is 5.4.2 (1 September), which implements FSRS-6; the next major version also requires Node 24 for its toolchain and changes the API. Adopt it when it is on npm and has been stable for a release or two. Because the review log is the source of truth, the upgrade is: bump the library, swap the wrapper, `replay` every card.
 
 ### Running on React Native
 
-`ts-fsrs` 5.x is plain TypeScript with no runtime dependencies, so it should run on Hermes, React Native's JavaScript engine. Nobody we found documents that, so it is the first task of the scheduler milestone: run the library's own scenarios plus a set of golden vectors (cards and grade sequences with expected stability, difficulty, and due dates, generated with `py-fsrs`) inside the app on a device. If anything fails, the fallback is our own FSRS-6 core, tested against the same vectors.
+`ts-fsrs` 5.x is plain TypeScript with no runtime dependencies, so it should run on Hermes, React Native's JavaScript engine. We found no report either way (searched 2026-10-22), so it is the first task of the scheduler milestone: run the library's own scenarios plus a set of golden vectors (cards and grade sequences with expected stability, difficulty, and due dates, generated with `py-fsrs` with fuzz off on both sides, since `py-fsrs` fuzzes from an unseeded random source) inside the app on a device. If anything fails, the fallback is our own FSRS-6 core, tested against the same vectors.
 
 ### Day boundaries and time zones
 
@@ -167,7 +167,7 @@ FSRS measures elapsed time in days; the app must decide when a day ends. Proposa
 | `ts-fsrs` | Scheduler in the app | MIT | Yes |
 | `py-fsrs` | Generating golden test vectors (dev only) | MIT | Yes |
 | `fsrs-rs` | Optimiser, later, server side | BSD-3-Clause | Yes; keep its notice |
-| `@open-spaced-repetition/binding` | JS access to the optimiser, later | Not checked yet | Check before adopting |
+| `@open-spaced-repetition/binding` | JS access to the optimiser, later | MIT (npm 0.5.0) | Yes |
 
 ## Open questions
 
@@ -180,10 +180,13 @@ FSRS measures elapsed time in days; the app must decide when a day ends. Proposa
 - open-spaced-repetition: `ts-fsrs` repository and README (MIT; main branch defaults to FSRS-7, Node ≥ 24). https://github.com/open-spaced-repetition/ts-fsrs
 - `ts-fsrs` 5.4.2 package README (FSRS-6; `generatorParameters`, `rollback`, `forget`, `reschedule`, `get_retrievability`). https://github.com/open-spaced-repetition/ts-fsrs/blob/v5.4.2/packages/fsrs/README.md
 - npm registry: `ts-fsrs` latest (5.4.2, MIT, no runtime dependencies), read 2026-10-22. https://registry.npmjs.org/ts-fsrs/latest
-- `ts-fsrs` releases (5.4.2 on 1 September; binding 0.5.0 on fsrs-rs 6.5.0). https://github.com/open-spaced-repetition/ts-fsrs/releases
-- open-spaced-repetition: `py-fsrs` (MIT; FSRS-6 default parameters; optional optimiser). https://github.com/open-spaced-repetition/py-fsrs
+- `ts-fsrs` releases (5.4.2 on 1 September; binding 0.5.0 on 6 June, on `fsrs` 6.5.0). https://github.com/open-spaced-repetition/ts-fsrs/releases
+- `ts-fsrs` 5.4.2 source: `strategies/learning_steps.ts` (Again = first step, Hard = rounded mean of the first two, Good = next step) and `strategies/seed.ts` (fuzz seed from time, reps, D × S). https://github.com/open-spaced-repetition/ts-fsrs/tree/v5.4.2/packages/fsrs/src/strategies
+- npm registry: `@open-spaced-repetition/binding` latest (0.5.0, MIT, `wasm32-wasi` optional dependency), read 2026-10-22. https://registry.npmjs.org/@open-spaced-repetition/binding/latest
+- open-spaced-repetition: `py-fsrs` `scheduler.py` (MIT; FSRS-6's 21 default parameters; learning steps 1m, 10m; relearning 10m; retention 0.9), read 2026-10-22. https://github.com/open-spaced-repetition/py-fsrs
 - open-spaced-repetition: `fsrs-rs` (BSD-3-Clause; FSRS-6 and FSRS-7; `compute_parameters`). https://github.com/open-spaced-repetition/fsrs-rs
 - open-spaced-repetition: srs-benchmark (default-parameter results). https://github.com/open-spaced-repetition/srs-benchmark
-- Anki Manual: Deck options (desired retention, optimise monthly, few hundred reviews). https://docs.ankiweb.net/deck-options.html
+- Anki Manual: Deck options (desired retention default 90%; optimise "once every month"; "less than a few hundred" reviews). https://docs.ankiweb.net/deck-options.html
+- Anki Manual: Preferences ("Next day starts at", default 4AM). https://docs.ankiweb.net/preferences.html
 - Anki Manual: Anki's SM-2 variant (learning steps, ease rules). https://docs.ankiweb.net/faqs/what-spaced-repetition-algorithm
 - Doc 01 in this folder for the model and the evidence.

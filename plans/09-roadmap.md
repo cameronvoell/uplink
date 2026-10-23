@@ -172,7 +172,7 @@ Stages 1–3 are about 37 sessions and need no server, no accounts, and no money
 | Owning an OAuth server or user data badly | 4 | Medium | High | Hosted auth recommended (doc 08); no public launch without a person's decision; export and delete from day one |
 | Expo SDK or React Native upgrades break native modules | 2, 5 | Medium | Low | Few native dependencies; Expo modules; pin SDK per stage |
 | FSRS-7 changes the `ts-fsrs` API | Any | High | Low | Own `Scheduler` interface; review log lets `replay` recompute (doc 02) |
-| Licence surprises (Kotlin FSRS ports, the optimiser binding) | 4–5 | Medium | Medium | Check licences at adoption; own ports where needed |
+| Licence surprises (Kotlin FSRS ports; the optimiser binding is MIT as of 0.5.0) | 4–5 | Medium | Medium | Check licences at adoption; own ports where needed |
 
 ## Open decisions
 
