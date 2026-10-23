@@ -9,7 +9,7 @@ Product-requirements docs for Uplink, written before any app code. Each doc is o
 | 03 | [Genuine learning vs rote memorisation](03-genuine-learning.md) | Transfer needs cards that ask for use, not strings: eight card types, two-button grading, general tool with technical practice first. | draft | 2026-10-22 |
 | 04 | [Core use case: practice → feedback → cards](04-practice-to-cards.md) | Notes → named mistakes (learner confirms) → typed cards per mistake → verify by running code → "to review"; plus follow-up sessions. Worked example. | draft | 2026-10-22 |
 | 05 | [Card format](05-card-format.md) | One markdown file per card (`---` splits sides), ULID `id` in frontmatter, Anki cloze, `run`/`output` code fences, Mermaid; review state only on device. Eight examples. | draft | 2026-10-22 |
-| 06 | v1 mobile app (React Native) | Screens, data model, offline storage, code and Mermaid rendering, Expo vs bare RN. | planned | |
+| 06 | [v1 mobile app (React Native)](06-v1-mobile-app.md) | Offline, single-user: GitHub/files/paste/share import, SQLite with insert-only review log, card body in one long-lived web view (spike-gated), Expo vs bare laid out for decision. | draft | 2026-10-22 |
 | 07 | Getting LLM-made cards into the app | MCP server design and alternatives: file sync, HTTP API, GitHub-backed decks. | planned | |
 | 08 | Website and backend (v2) | Accounts, sync, sharing; typed API, services, Postgres, auth, conflicts. | planned | |
 | 09 | Roadmap | Stages, milestones, demos, risks, open decisions. | planned | |
