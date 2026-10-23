@@ -5,7 +5,7 @@ Product-requirements docs for Uplink, written before any app code. Each doc is o
 | # | Doc | Summary | Status | Updated |
 |---|---|---|---|---|
 | 01 | [Spaced repetition background](01-spaced-repetition-background.md) | Leitner, SM-2, Anki's variant, HLR, Ebisu, FSRS: how each works, evidence, and FSRS on one page. | draft | 2026-10-22 |
-| 02 | Is FSRS the right tool for Uplink? | Recommendation: scheduler choice, cold start, small decks, libraries and licenses. | planned | |
+| 02 | [Is FSRS the right tool for Uplink?](02-is-fsrs-right.md) | Yes: FSRS-6 via `ts-fsrs` 5.x, default params, append-only review log as source of truth, no SM-2 phase. | draft | 2026-10-22 |
 | 03 | Genuine learning vs rote memorisation | Card types that test understanding, learning-science evidence, product positioning. | planned | |
 | 04 | Core use case: practice → feedback → cards | A practice session's notes become targeted decks via an LLM. End-to-end flow and examples. | planned | |
 | 05 | Card format | Markdown card spec, frontmatter, code, Mermaid, cloze, stable IDs, review state kept apart. | planned | |
