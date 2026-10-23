@@ -4,35 +4,22 @@ Status: done · Updated: 2026-10-22
 
 ## Summary
 
-A card is a markdown file: YAML frontmatter, a front, a `---` line, a back. A deck is a folder of those files plus a `deck.md`. Code uses ordinary fenced blocks with a language tag, Mermaid uses a `mermaid` fence, and cloze uses Anki's `{{c1::…}}` syntax. Every card has a stable `id` in its frontmatter, so edits and renames keep its history. Review state never goes in the files; it lives on the device, keyed by that `id`. One card per file is the canonical form agents write; multi-card files are allowed for people.
+A card is a markdown file: YAML frontmatter with a stable ULID `id`, a front, a `---` line, a back; a deck is a folder of them plus `deck.md`.
+Code is ordinary fenced blocks (`run`/`output` attributes let `uplink check` execute them), diagrams are `mermaid` fences, and cloze is Anki's `{{c1::…}}`.
+Review state never goes in the files; it lives on the device, keyed by `id`. Agents write one card per file; people may put several in one.
 
 ## Problem
 
-Docs 03 and 04 need a card shape for their examples. Before any app or tooling exists, the format has to be fixed, because everything reads or writes it: the learner's agent (doc 04), the CLI check, the app (doc 06), the MCP server (doc 07), and the backend (doc 08). A format that is awkward to write gets written wrong by agents; one that mixes content with review state breaks sharing; one without stable IDs loses a learner's progress every time they fix a typo.
+Everything reads or writes the format: the learner's agent (doc 04), `uplink check`, the app (doc 06), the MCP server (doc 07), and the backend (doc 08). A format that is awkward to write gets written wrong by agents; one that mixes content with review state breaks sharing; one without stable IDs loses a learner's progress every time they fix a typo.
 
-## Goals
+## Goals and non-goals
 
-- A format a person can write in any editor and an LLM can write without a tool, that renders sensibly on GitHub.
-- Express all eight card types from doc 03, with code in any language and Mermaid diagrams.
-- Card identity that survives edits, renames, and moves.
-- Content and review state fully separate, so decks can be shared, published, and regenerated.
-- Mechanically checkable: a schema for frontmatter and rules a CLI can enforce, including running code.
+- **Goals:** writable in any editor and by an LLM without a tool, and readable on GitHub; all eight card types from doc 03, code in any language, Mermaid; identity that survives edits, renames, and moves; content and review state fully separate; mechanically checkable, including running code.
+- **Not here:** phone rendering beyond what the format requires (doc 06); how files reach the app (docs 06, 07); syncing review state (doc 08); audio, LaTeX, and images beyond plain markdown images (Later).
 
-## Non-goals
+## Who writes cards
 
-- Rendering on the phone (doc 06) beyond what the format requires.
-- How files reach the app (docs 06 and 07).
-- Sync of review state between devices (doc 08).
-- Audio, images beyond plain markdown images, and LaTeX (listed under Later).
-
-## Users and use cases
-
-| Who writes | How | What the format must make easy |
-|---|---|---|
-| The learner's agent (Claude Code, ChatGPT, any other) | Writes files into a deck folder, following a prompt and the card guide | One self-contained file per card; no IDs to coordinate; a checker that says exactly what is wrong |
-| A person in an editor or on GitHub | Types cards by hand, often several on one topic | Little ceremony; several cards in one file; looks right in a markdown preview |
-| A deck author sharing a deck | Publishes a git repo | No personal data in files; stable IDs so learners' progress survives updates |
-| The app | Parses decks on device, offline | One unambiguous grammar; cheap to parse; a clear key for each reviewable item |
+The learner's agent (needs one self-contained file per card, no IDs to coordinate, a checker that says exactly what is wrong); a person in an editor (little ceremony, several cards per file); a deck author publishing a repo (no personal data in files, IDs stable across updates); and the app parsing offline (one unambiguous grammar, a clear key per reviewable item).
 
 ## Prior art
 
@@ -193,15 +180,15 @@ Ordinary fenced code blocks. The first word of the info string is the language (
 
 Toolchain versions come from `deck.md`'s `toolchains`, defaulting to current LTS releases. Lint findings are warnings, not errors, because bug cards contain bugs on purpose; `bug` cards should pass the compile check unless marked `expect-error`.
 
-**Width.** A phone in portrait shows roughly 40–50 monospace characters at a readable size (estimate: about 360 points of usable width at 7–8 points per character). Code lines should be at most 50 characters; the checker warns above 60. Longer lines scroll sideways in the app rather than wrap, because wrapped code misleads, especially Python. Doc 04 also caps card code at about 15 lines.
+**Width.** A phone in portrait shows roughly 40–50 monospace characters at a readable size (estimate: about 360 points of usable width at 7–8 points per character). Code lines should be at most 50 characters; the checker warns above 60. Longer lines scroll sideways in the app rather than wrap, because wrapped code misleads, especially Python. Doc 04 proposes about 15 lines of code per card at most.
 
 ### Mermaid
 
-A fence tagged `mermaid`, as on GitHub. v1 must render `flowchart`, `sequenceDiagram`, `stateDiagram-v2`, and `classDiagram`; other diagram types fall back to showing the source. Diagrams should stay within about 12 nodes or 6 participants to be legible on a phone. The checker validates syntax with Mermaid's own parser. How the app renders it (WebView, server-rendered SVG, or native) is doc 06's decision.
+A fence tagged `mermaid`, as on GitHub. v1 must render `flowchart`, `sequenceDiagram`, `stateDiagram-v2`, and `classDiagram`; other diagram types fall back to showing the source. Diagrams should stay within about 12 nodes or 6 participants to be legible on a phone. The checker validates syntax with Mermaid's own parser; whether that runs in Node without a browser DOM is unverified and belongs to the stage 1 `uplink check` task (doc 09). How the app renders it (WebView, server-rendered SVG, or native) is doc 06's decision.
 
 ### Multi-card files
 
-Allowed, for people writing by hand; generators write one card per file. Cards are separated by a line `<!-- card -->`, which renders invisibly. The file's leading frontmatter is a default for every card in it; each card may add its own frontmatter block (which must include `id`) straight after the marker. Example 8 below shows one.
+Allowed, for people writing by hand; generators write one card per file. Cards are separated by a line `<!-- card -->`, which renders invisibly. The file's leading frontmatter is a default for every card in it; each card may add its own frontmatter block (which must include `id`) straight after the marker. Example 8 in the appendix shows one. On GitHub a per-card frontmatter block renders as a rule and a heading, not a table; acceptable for hand-written files.
 
 hashcards' argument for many cards per file is real: neighbouring cards are usually related and get edited together. The case for one file per card is stronger for an agent-written product: an agent can create, rewrite, or delete one card without touching others, diffs and merge conflicts stay per card, and a dedupe check can compare files.
 
@@ -234,9 +221,50 @@ The deck folder contains no review data: no due dates, no counts, no "seen" flag
 
 Reasons: decks are shared and often public, and a learner's lapses are private; reviewing should not create file changes that conflict in git (Obsidian Spaced Repetition's inline comments show the cost); and agents rewrite card files freely, which would clobber state stored inside them. Moving the log between devices is doc 08's problem. The format reserves a `.uplink/` folder at the deck root for local tool data; it should be git-ignored.
 
-## Examples
+## Requirements
 
-Eight complete cards: three programming languages, seven card types, one diagram, one multi-card file, and Spanish. Outputs were traced by hand for this draft; the CLI check will run them.
+**Must (v1)**
+- The grammar above: frontmatter with `type`; `---` side separator after a blank line; `<!-- card -->` for multi-card files; `deck.md` per deck.
+- The frontmatter schema, published as JSON Schema; unknown keys preserved.
+- ULID `id` per card; item keys `id`, `id#r`, `id#cN`; review state keyed by item key, never stored in deck files.
+- Cloze `{{cN::answer::hint}}`, Anki-compatible; recognised in code only in `cloze` fences.
+- Code fences with `run`, `output`, `cloze`, `snippet`, `expect-error`; highlighting and checks for Java, Python, TypeScript.
+- `mermaid` fences for the four diagram types listed.
+- `uplink check`: validates schema and grammar, detects duplicate IDs, compiles and runs code as marked, validates Mermaid, reports `file:line` with a fix; `--fix` assigns missing IDs.
+- One TypeScript parser shared by the CLI and the app, so they never disagree.
+- The card-writing guide (`CARD-GUIDE.md`, doc 03) shipped with the spec, with the appendix examples.
+
+**Should:** lint and format warnings per language and for line width; highlighting for the second-tier languages; an "edited since last review" marker and a "reset progress" action; images from the deck's `assets/` folder.
+
+**Later:** LaTeX math (`$…$`, KaTeX, as Mochi does); audio (`language` already tells text-to-speech what to speak); Anki `.apkg` import and export, helped by the shared cloze syntax; nested clozes (Anki has them since 2.1.56); image occlusion.
+
+## Open questions
+
+- ULIDs are 26 characters of noise in every file. A shorter random ID (10–12 base32 characters) is enough for one learner's decks; ULIDs are safer once decks are shared and merged. Proposal: ULID. **Decision needed.**
+- Write IDs back into files, or always keep a path → id map? Writing back survives renames but means modifying the learner's repo. Proposal: write back via the CLI or the learner's agent; the app keeps a map for decks it cannot write.
+- `language` carries two meanings (natural or programming). Two fields would be cleaner, but doc 03 argues for one domain-free field. Keep one unless it causes real confusion.
+- How strict is the 50-character line guideline? Revisit once the app's code view exists (doc 06).
+
+## Sources
+
+Re-checked 2026-10-22: the Anki editing page, Mochi's formatting page, Obsidian SR's data-storage page, the hashcards article, and the carddown write-up.
+
+- Anki Manual, Editing: cloze syntax, hints, numbering, nested clozes from 2.1.56. https://docs.ankiweb.net/editing.html
+- Anki Manual, Text files (GUID column, first-field matching), and forum reports of first-field updates. https://docs.ankiweb.net/importing/text-files.html ; https://forums.ankiweb.net/t/update-deck-via-extended-csv-with-new-synonyms-avoiding-old-duplicates/41772
+- Mochi docs, Advanced formatting (side separator `---`, cloze groups, KaTeX) and Exporting (markdown export drops review history). https://mochi.cards/docs/markdown/advanced-formatting/ ; https://mochi.cards/docs/import-and-export/exporting/
+- Obsidian Spaced Repetition: README (card syntax) and Data storage (inline `<!--SR:…-->` comments; note-level state in frontmatter). https://github.com/st3v3nmw/obsidian-spaced-repetition ; https://stephenmwangi.com/obsidian-spaced-repetition/data-storage/
+- Borretti, "Hashcards: A Plain-Text Spaced Repetition System" (syntax, identity by hash of the card's text, SQLite next to the cards). https://borretti.me/article/hashcards-plain-text-spaced-repetition
+- carddown (content hashing, SQLite state). https://www.linuxlinks.com/carddown-spaced-repetition-markdown-notes/
+- ULID specification. https://github.com/ulid/spec
+- CommonMark spec: setext headings and fenced code info strings. https://spec.commonmark.org/
+- GitHub Docs, Creating and highlighting code blocks (language tags, Mermaid). https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks
+- Python docs, `collections.deque` (O(1) appends and pops at either end; list `pop(0)` is O(n)). https://docs.python.org/3/library/collections.html#collections.deque
+- Nishtala et al. (2013), "Scaling Memcache at Facebook", NSDI (leases against stale sets). https://www.usenix.org/conference/nsdi13/technical-sessions/presentation/nishtala
+- Docs 02 (review log), 03 (card types, grading), and 04 (`source`, `mistake`, verification) in this folder.
+
+## Appendix: examples
+
+Eight complete cards: three programming languages, seven card types, one diagram, one multi-card file, and Spanish. Outputs were traced by hand, not executed; `uplink check` will run the `run` fences.
 
 ### 1 · `predict`, Java
 
@@ -490,50 +518,3 @@ Could you bring me the bill, please?
 ```
 
 Three items: the first card both ways (`…SJR`, `…SJR#r`), the second one way.
-
-## Requirements
-
-**Must (v1)**
-- The grammar above: frontmatter with `type`; `---` side separator after a blank line; `<!-- card -->` for multi-card files; `deck.md` per deck.
-- The frontmatter schema, published as JSON Schema; unknown keys preserved.
-- ULID `id` per card; item keys `id`, `id#r`, `id#cN`; review state keyed by item key, never stored in deck files.
-- Cloze `{{cN::answer::hint}}`, Anki-compatible; recognised in code only in `cloze` fences.
-- Code fences with `run`, `output`, `cloze`, `snippet`, `expect-error`; highlighting and checks for Java, Python, TypeScript.
-- `mermaid` fences for the four diagram types listed.
-- `uplink check`: validates schema and grammar, detects duplicate IDs, compiles and runs code as marked, validates Mermaid, reports `file:line` with a fix; `--fix` assigns missing IDs.
-- One TypeScript parser shared by the CLI and the app, so they never disagree.
-- The card-writing guide (doc 03) shipped with the spec, with these examples.
-
-**Should**
-- Lint and format warnings per language; line-width warnings.
-- Highlighting for the second-tier languages.
-- "Edited since last review" marker and "reset progress" action.
-- Images from the deck's `assets/` folder.
-
-**Later**
-- LaTeX math (`$…$`, KaTeX, as Mochi does).
-- Audio on cards (`language` already tells text-to-speech what to speak).
-- Anki import and export (`.apkg`), helped by the shared cloze syntax.
-- Nested clozes; image occlusion.
-
-## Open questions
-
-- ULIDs are 26 characters of noise in every file. A shorter random ID (10–12 characters of base32) is enough for one learner's decks; ULIDs are safer once decks are shared and merged. Proposal: ULID. **Decision needed.**
-- Should the importer write IDs back into files, or always keep a separate path → id map? Writing back is simpler and survives renames; it means the app modifies the learner's repo. Proposal: write back via the CLI or the learner's agent; the app keeps a map for decks it cannot write.
-- `language` carries two meanings (natural or programming). Two fields (`lang` and `code`) would be cleaner but doc 03 argues for one domain-free field. Keep one unless it causes real confusion.
-- How strict is the 50-character line guideline? Revisit after the app's code view exists (doc 06).
-
-## Sources
-
-- Anki Manual, Editing: cloze syntax, hints, numbering, nested clozes. https://docs.ankiweb.net/editing.html
-- Anki Manual, Text files (GUID column, first-field matching), and forum reports of first-field updates. https://docs.ankiweb.net/importing/text-files.html ; https://forums.ankiweb.net/t/update-deck-via-extended-csv-with-new-synonyms-avoiding-old-duplicates/41772
-- Mochi docs, Advanced formatting (side separator `---`, cloze groups, KaTeX) and Exporting (markdown export drops review history). https://mochi.cards/docs/markdown/advanced-formatting/ ; https://mochi.cards/docs/import-and-export/exporting/
-- Obsidian Spaced Repetition: README (card syntax) and Data storage (inline `<!--SR:…-->` comments). https://github.com/st3v3nmw/obsidian-spaced-repetition ; https://stephenmwangi.com/obsidian-spaced-repetition/data-storage/
-- Borretti, "Hashcards: A Plain-Text Spaced Repetition System" (syntax, content-hash identity, SQLite state). https://borretti.me/article/hashcards-plain-text-spaced-repetition
-- carddown (content hashing, SQLite state). https://www.linuxlinks.com/carddown-spaced-repetition-markdown-notes/
-- ULID specification. https://github.com/ulid/spec
-- CommonMark spec: setext headings and fenced code info strings. https://spec.commonmark.org/
-- GitHub Docs, Creating and highlighting code blocks (language tags, Mermaid). https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks
-- Python docs, `collections.deque` (O(1) appends and pops at either end; list `pop(0)` is O(n)). https://docs.python.org/3/library/collections.html#collections.deque
-- Nishtala et al. (2013), "Scaling Memcache at Facebook", NSDI (leases against stale sets). https://www.usenix.org/conference/nsdi13/technical-sessions/presentation/nishtala
-- Docs 02 (review log), 03 (card types, grading), and 04 (`source`, `mistake`, verification) in this folder.
