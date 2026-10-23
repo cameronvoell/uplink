@@ -17,6 +17,8 @@ Product-requirements docs for Uplink, written before any app code. Each doc is o
 | 08 | [Website and backend (v2)](08-website-and-backend.md) | One TypeScript service sharing the app's packages, REST + OpenAPI (argued over GraphQL), Postgres, custom sync (union-merged review log, LWW fields), AuthKit vs Better Auth, publish/follow/fork. | done | reviewed | 2026-10-22 |
 | 09 | [Roadmap](09-roadmap.md) | Five stages, ~78 one-hour sessions; stages 1–3 (~37) need no server. Spike first per stage, a demo to finish each, risks, and seven open decisions with the milestone each blocks. | done | reviewed | 2026-10-22 |
 
+**Code.** [`packages/scheduler`](../packages/scheduler/README.md): our own zero-dependency FSRS-6 core (2026-10-22), test-first against py-fsrs golden vectors; it takes D3 the own-core way for now.
+
 Order follows the dependency chain: scheduler background and choice first, then what the cards should teach, then the format, then the app, then distribution and the roadmap.
 
 **Set review (2026-10-22).** All nine reviewed together and marked `done`. Fixes: undo is a tombstone event from v1 (docs 02, 06, 08), so the review log merges without migration; review events carry device-made ULIDs (02, 06); doc 04's generating tools became the `cards_from_notes` MCP prompt and its "where it runs" stages match doc 07; the examples in docs 03 and 04 follow doc 05's format; the grading default is settled in doc 03 and referenced from 01 and 02; the renderer's MCP Apps reuse and the stage 3 packages are in doc 06. Open decisions are collected in [doc 09](09-roadmap.md#open-decisions).
