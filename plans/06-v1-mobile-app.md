@@ -64,7 +64,7 @@ Paste matters more than it looks: an agent in a phone chat can print doc 05 card
 - **Rate limits.** Unauthenticated REST calls are limited to 60 an hour per IP, so two calls per pull is ample for manual pulls. Raw-host fetches do not count against the REST limit but have their own limits, which GitHub does not publish in the REST docs (unverified).
 - **Pinned to one commit**, so a half-pushed batch of cards is never read mixed.
 - **Large repos.** A recursive tree response is capped at 100,000 entries or 7 MB and sets `truncated`; then the app walks subtrees one at a time. Deck repos will rarely hit this.
-- **Read-only.** If a card has no `id`, the app keeps a path → id map and shows "run the checker" on the deck; `uplink check --fix` (doc 05) assigns IDs in the repo.
+- **Read-only.** If a card has no `id`, the app keeps a path → id map and shows "run the checker" on the deck; `uplink check --fix` (doc 05) assigns IDs in the repo. If a card's `id` already belongs to another of the learner's decks (a copied or forked deck), the app maps that path to a new local id the same way, so item keys stay unique (doc 08).
 - **Private repos:** a fine-grained, read-only personal access token in secure storage (Should); OAuth device flow later.
 - **Alternatives considered.** Cloning with `isomorphic-git` over an `fs` shim (`expo-fs`) gives real git semantics, but the shim fakes file modes and throws on symlinks, and it adds weight. Downloading the repo archive is one request but re-downloads everything. Tree-plus-changed-files is the cheapest approach that is incremental.
 
