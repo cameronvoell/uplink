@@ -96,7 +96,7 @@ Goal: "I know kung fu". A learner names what they want to learn, their agent wri
 
 | # | Milestone | Done when | Sessions |
 |---|---|---|---|
-| 3.0 | SDK spike | A one-tool server on the MCP TypeScript SDK that targets 2026-07-28 (v2 if stable, otherwise beta behind a wrapper), working in MCP Inspector and Claude Code | 1 |
+| 3.0 | SDK spike | A one-tool server on the MCP TypeScript SDK that targets 2026-07-28 (`@modelcontextprotocol/server` 2.x, stable since July 2026, behind a thin wrapper), working in MCP Inspector and Claude Code | 1 |
 | 3.1 | `packages/mcp-tools` | `DeckStore` interface; `uplink_guide`, `list_decks`, `search_cards`, `check_cards`, `propose_cards`, `revise_proposed`; contract tests | 3 |
 | 3.2 | `@uplink/mcp` stdio server | `FileDeckStore`, deck path from configuration, all-or-nothing idempotent `propose_cards`, structured errors | 1 |
 | 3.3 | `cards_from_notes` prompt | Doc 04's flow as an MCP prompt; tested on three real practice notes | 1 |
@@ -167,7 +167,7 @@ Stages 1–3 are about 37 sessions and need no server, no accounts, and no money
 | `ts-fsrs` misbehaves under Hermes | 2 | Low | Medium | Golden vectors on device in 2.1; fallback is an own FSRS-6 core against the same vectors (doc 02) |
 | Agent-written cards are plausible but wrong, and learners memorise errors | 1–3 | High | High | Checker runs code; traceability to a named mistake; to-review inbox; "this card is wrong" measured (doc 04) |
 | Agent-written cards stay on the surface (term ↔ definition) | 1–3 | High | Medium | Card guide with types and lenses; cards from the learner's own mistakes (doc 03); measure deletion rate per type |
-| MCP spec, SDK, or host support moves (SDK v2 in beta; ChatGPT availability unclear) | 3–4 | High | Medium | Thin wrapper over the SDK; local first; paste stays a supported path (doc 07) |
+| MCP spec, SDK, or host support moves (SDK v2 is young and changed license at 2.3.0; ChatGPT availability unclear) | 3–4 | High | Medium | Thin wrapper over the SDK; local first; paste stays a supported path (doc 07) |
 | Stage 4 scope swallows the project | 4 | High | High | Stages 1–3 are complete without it; 4.0–4.3 (sync) deliver value before the website |
 | Owning an OAuth server or user data badly | 4 | Medium | High | Hosted auth recommended (doc 08); no public launch without a person's decision; export and delete from day one |
 | Expo SDK or React Native upgrades break native modules | 2, 5 | Medium | Low | Few native dependencies; Expo modules; pin SDK per stage |
