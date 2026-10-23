@@ -1,6 +1,6 @@
 # 08 · Website and backend (v2)
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -210,7 +210,7 @@ The design follows from doc 02's decision that the review log is the source of t
 | Data | Who writes it | Merge rule | Why it is safe |
 |---|---|---|---|
 | Review events | Devices, offline | **Union** by event id (ULID made on the device) | Insert-only. Two devices reviewing the same card offline produce two real reviews; replaying the merged log in `reviewed_at` order gives the state both would agree on |
-| Undo | Devices | A new event with `undoes: <id>`; replay skips the undone event | Doc 06's "delete the newest row" works on one device. Once events sync, deletion would resurrect on the next pull, so undo becomes a tombstone |
+| Undo | Devices | A new event with `undoes: <id>`; replay skips the undone event | Deleting a synced event would resurrect it on the next pull. A tombstone merges by union like any other event, and doc 06 records undo this way from v1 |
 | Scheduler state | Nobody: derived | Recomputed by `replay` on each device and on the server | It is a cache (doc 02) |
 | Item status, settings | Devices, website | Last writer wins per field, ordered by a hybrid logical clock | Rare, small, human-paced edits; losing the older of two conflicting "suspend" taps is acceptable |
 | Hosted deck content | Website, MCP proposals the learner kept, API | Server-authoritative; edits carry the base `revision`, and a stale edit is rejected with the current version | Card edits are deliberate and rare; showing "this card changed, reapply?" beats a silent merge |
@@ -301,7 +301,6 @@ Sign-in methods: email magic link, passkeys, Google, and Sign in with Apple. App
 - Should a learner without an account keep v1's direct GitHub pull after v2 ships, or does every GitHub deck go through the server mirror? Proposal: keep both. No account remains a supported mode, which keeps the app useful offline and without sign-up.
 - Is last-writer-wins right for "suspend" versus "keep" on two devices, or should suspend win? Proposal: last-writer-wins, and measure.
 - Followed decks: should an author's edit that changes a card's meaning reset followers' progress? Only the author knows. Proposal: an optional "this is a new question" flag on publish that issues a new `id` (doc 05's rule).
-- Doc 06's undo deletes the newest row. With sync it must become a tombstone event. Align doc 06 during the set review.
 
 ## Sources
 

@@ -1,6 +1,6 @@
 # 04 · Core use case: practice session → feedback → cards
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -21,7 +21,7 @@ LLMs can do the slow part, but left alone they write surface cards (doc 03): ter
 
 ## Non-goals
 
-- The card file syntax (doc 05); examples here use the provisional shape from doc 03.
+- The card file syntax (doc 05). Examples here follow it and leave out `id`; `uplink check --fix` or `propose_cards` assigns one.
 - The MCP server and other transports (doc 07).
 - Running or grading the practice session itself. Uplink consumes notes; it is not a judge or an interview simulator.
 
@@ -263,13 +263,14 @@ Follow-up 2 is deliberately the case where the learner's preferred tool fails. T
 
 | Stage | Who runs the LLM | How cards reach the app | Uplink builds |
 |---|---|---|---|
-| **v1** | The learner's own agent (Claude Code, ChatGPT, any other) | Files in a deck folder or repo, imported by the app (doc 06) | A published prompt and the card spec; a CLI check for the verify step (4) |
-| **v2** | The learner's agent, through an Uplink MCP tool | MCP writes straight into the deck (doc 07) | Tools such as `extract_mistakes` and `cards_from_mistakes`, with the guide in their descriptions |
-| **v2, hosted** | Uplink's backend calls a model API | Synced to the app (doc 08) | Server pipeline; structured outputs for steps 1 and 3 |
+| **v1** | The learner's own agent (Claude Code, ChatGPT, any other) | Files in a deck folder or repo, or pasted, imported by the app (doc 06) | A published prompt, the card guide, an Agent Skill, and a CLI check for the verify step (4) |
+| **Stage 3** | The learner's agent, through a local Uplink MCP server | `propose_cards` writes validated files into the deck folder (doc 07) | The `cards_from_notes` MCP prompt (this flow) and the tools `search_cards`, `check_cards`, `propose_cards` |
+| **v2** | The learner's agent, through the hosted MCP server | `propose_cards` puts cards in the account's inbox; synced to the app (docs 07, 08) | The same tools and prompt, hosted |
+| **Later, opt-in** | Uplink's backend calls a model API | Synced to the app (doc 08) | A server pipeline with structured outputs for steps 1 and 3 |
 
-v1 needs no server and no API key held by Uplink. The learner's agent already has the notes and the deck repo. Uplink supplies the instructions and the checks.
+Through stage 3 and v2, Uplink never runs a model and holds no model API key. The learner's agent already has the notes and the deck. Uplink supplies the instructions, the checks, and somewhere to put the result. MCP 2026-07-28 deprecates sampling, so an MCP server cannot borrow the client's model anyway (doc 07).
 
-With an API, steps 1 and 3 should use schema-constrained output (Claude's structured outputs with a JSON schema, or strict tool inputs; other providers have equivalents) so the result parses every time. The schema enforces shape, not truth; step 4 still runs.
+If the opt-in hosted pipeline is ever built, steps 1 and 3 should use schema-constrained output (Claude's structured outputs with a JSON schema, or strict tool inputs; other providers have equivalents) so the result parses every time. The schema enforces shape, not truth; step 4 still runs.
 
 ### The v1 prompt (sketch)
 
@@ -321,7 +322,7 @@ Evidence on LLM-written cards is thin. We found no peer-reviewed head-to-head st
 - A "this card is wrong" action on any card that records why, for measuring generator quality.
 
 **Later**
-- MCP tools for each step (doc 07); a hosted pipeline (doc 08).
+- This flow as the `cards_from_notes` MCP prompt over `propose_cards` (doc 07, stage 3); an opt-in hosted pipeline (doc 08).
 - Follow-ups as schedulable items with their own spacing.
 - Notes captured from audio (a dictated debrief after a mock interview).
 - Per-learner mistake history across sessions: "third time this month you missed an empty-input case".

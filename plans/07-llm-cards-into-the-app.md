@@ -1,6 +1,6 @@
 # 07 · Getting LLM-made cards into the app
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -81,7 +81,7 @@ flowchart TD
 Target **MCP 2026-07-28**. It matters here in four ways:
 
 - **Stateless.** No `initialize` handshake and no `Mcp-Session-Id`. Every request carries its protocol version and capabilities in `_meta`. The hosted server can run behind a plain load balancer with no session affinity. State that must span calls (a batch of proposed cards) uses an explicit handle the model passes back, as the spec recommends.
-- **Sampling is deprecated.** A server cannot rely on borrowing the client's model. This settles a question doc 04 left open: Uplink's server **does not generate cards**. The learner's model generates them, guided by an MCP prompt and the guide, and the server validates and stores. Doc 04's proposed tools `extract_mistakes` and `cards_from_mistakes` become a prompt, not tools.
+- **Sampling is deprecated.** A server cannot rely on borrowing the client's model. Uplink's server therefore **does not generate cards**. The learner's model generates them, guided by an MCP prompt and the guide, and the server validates and stores. Doc 04's flow becomes the `cards_from_notes` prompt, not a set of generating tools.
 - **Roots are deprecated.** In local mode, the deck folder is server configuration (`--decks <path>`), not something negotiated with the client. That is the migration the spec suggests.
 - **Elicitation now uses Multi Round-Trip Requests** (`resultType: "input_required"`, then a retry with `inputResponses`). Uplink uses it in one place: confirming a write into a deck the learner has not used with this client before. It degrades gracefully when the client lacks elicitation support (below).
 
@@ -307,8 +307,6 @@ The agent now gets `propose_cards` with validation on write, and `search_cards` 
 - **All-or-nothing batches**: simpler for the learner (one batch, one triage) and for retries, but one bad card blocks nine good ones. Proposal: all-or-nothing, with errors precise enough that the model fixes them in one retry. Measure retry counts.
 - **Should a kept card be revisable by an agent** (for example, "fix the typo the learner reported")? Proposal: no in v2. The agent proposes a replacement card, and the app offers "replace the original, keep its history" (doc 05's same-`id` edit).
 - **ChatGPT availability** by plan and on mobile is unclear and changing. Re-check before v2 planning.
-- **Doc 04** names server tools `extract_mistakes` and `cards_from_mistakes`. With sampling deprecated, those become the `cards_from_notes` prompt. Align doc 04 during the set review.
-- **Doc 06** recommends rendering option B, partly for reuse. The MCP Apps preview is a concrete second consumer. Note it there in the set review.
 
 ## Sources
 

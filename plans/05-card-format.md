@@ -1,6 +1,6 @@
 # 05 · Card format
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -8,7 +8,7 @@ A card is a markdown file: YAML frontmatter, a front, a `---` line, a back. A de
 
 ## Problem
 
-Docs 03 and 04 used a provisional card shape. Before any app or tooling exists, the format has to be fixed, because everything reads or writes it: the learner's agent (doc 04), the CLI check, the app (doc 06), the MCP server (doc 07), and the backend (doc 08). A format that is awkward to write gets written wrong by agents; one that mixes content with review state breaks sharing; one without stable IDs loses a learner's progress every time they fix a typo.
+Docs 03 and 04 need a card shape for their examples. Before any app or tooling exists, the format has to be fixed, because everything reads or writes it: the learner's agent (doc 04), the CLI check, the app (doc 06), the MCP server (doc 07), and the backend (doc 08). A format that is awkward to write gets written wrong by agents; one that mixes content with review state breaks sharing; one without stable IDs loses a learner's progress every time they fix a typo.
 
 ## Goals
 
@@ -522,7 +522,6 @@ Three items: the first card both ways (`…SJR`, `…SJR#r`), the second one way
 - Should the importer write IDs back into files, or always keep a separate path → id map? Writing back is simpler and survives renames; it means the app modifies the learner's repo. Proposal: write back via the CLI or the learner's agent; the app keeps a map for decks it cannot write.
 - `language` carries two meanings (natural or programming). Two fields (`lang` and `code`) would be cleaner but doc 03 argues for one domain-free field. Keep one unless it causes real confusion.
 - How strict is the 50-character line guideline? Revisit after the app's code view exists (doc 06).
-- Docs 03 and 04 use the provisional shape (no `id`, outputs in prose). Bring their examples in line during the set review.
 
 ## Sources
 

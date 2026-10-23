@@ -1,6 +1,6 @@
 # 02 · Is FSRS the right tool for Uplink?
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -71,10 +71,12 @@ flowchart LR
 export type Grade = 1 | 2 | 3 | 4; // Again, Hard, Good, Easy
 
 export interface ReviewEvent {
-  cardId: string;
+  id: string;           // ULID made on the device; makes multi-device merge a union (doc 08)
+  cardId: string;       // the item key: id, id#r, or id#cN (doc 05)
   reviewedAt: string;   // ISO 8601, UTC
   grade: Grade;
   durationMs?: number;  // time to answer, for analytics only
+  undoes?: string;      // set on an undo: the id of the event it cancels; replay skips both
 }
 
 export interface Scheduler {
@@ -142,7 +144,7 @@ FSRS measures elapsed time in days; the app must decide when a day ends. Proposa
 
 **Must**
 - FSRS-6 scheduling on device, offline, through our `Scheduler` interface.
-- Append-only review log, synced with the deck's progress, never edited in place (undo appends a reversal, or rolls back only the newest entry).
+- Append-only review log, never edited in place. Undo appends a tombstone event (`undoes`), so the log stays safe to merge once sync exists (doc 08).
 - Card state is rebuildable from the log; a test proves `replay(log)` equals the stored state.
 - Golden-vector tests run on a real device under Hermes.
 - Per-deck desired retention and maximum interval.
@@ -150,7 +152,7 @@ FSRS measures elapsed time in days; the app must decide when a day ends. Proposa
 **Should**
 - Interval labels on grade buttons.
 - "Why is this due?" sheet showing R, S, D.
-- A two-button mode (Again / Good) for decks where Hard and Easy carry no meaning (decided in doc 03).
+- Two buttons (Again / Good) by default, four as a setting (decided in doc 03).
 
 **Later**
 - Server-side parameter fitting with a held-out check.
@@ -170,7 +172,6 @@ FSRS measures elapsed time in days; the app must decide when a day ends. Proposa
 ## Open questions
 
 - Use the library, or write our own FSRS-6 core tested against it? The library is the default here. Writing our own costs a day or two and teaches the model in depth; the risk sits in scheduling policy (learning steps, fuzz), not in the forty lines of maths. **Decision needed.**
-- Four buttons or two by default? Doc 03 decides from the card types.
 - Should a learner see retrievability on every card, or only in the "why" sheet?
 - What threshold, measured how, should gate server-side fitting?
 

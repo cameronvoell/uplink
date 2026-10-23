@@ -1,6 +1,6 @@
 # 09 · Roadmap
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 

@@ -1,6 +1,6 @@
 # 06 · v1 mobile app (React Native)
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -165,12 +165,13 @@ erDiagram
     text seen_content_hash
   }
   REVIEW_EVENT {
-    integer seq PK "append-only"
+    text id PK "ULID made on device"
     text item_key FK
     text reviewed_at "UTC"
     integer grade
     integer duration_ms
     text scheduler "fsrs-6@ts-fsrs-5.x"
+    text undoes "event id, or null"
   }
   ITEM_STATE {
     text item_key PK
@@ -183,7 +184,7 @@ erDiagram
   }
 ```
 
-- **`REVIEW_EVENT` is insert-only.** Undo deletes only the newest row for that item and recomputes state (doc 02). A test replays the whole log and compares with `ITEM_STATE`.
+- **`REVIEW_EVENT` is insert-only.** Undo inserts a tombstone event (`undoes` = the cancelled event's id) and recomputes state; replay skips undone events (doc 02). Deleting the row would be simpler on one device, but it would come back on the next pull once sync exists (doc 08), so v1 uses the sync-safe form from the start and v2 needs no migration. A test replays the whole log and compares with `ITEM_STATE`.
 - **`scheduler` on each event** records which algorithm produced the state at the time, for audits after upgrades.
 - **Queue query:** active items with `due <= now`, across all decks, ordered by due then a stable shuffle, plus up to N new items a day per deck (default 10). The shuffle keeps doc 03's mixed order without re-sorting by deck.
 - **Day boundary:** 04:00 local, timestamps in UTC (doc 02).
@@ -219,7 +220,7 @@ The hard part of v1. A card is markdown with code (Shiki-quality highlighting is
 
 ### Recommendation: B, gated by a spike
 
-Render the card body in **one long-lived web view** that receives the next card as a prop, so web-view start-up is paid once per session, not per card. Grade buttons, navigation, and the rest of the UI stay native. Reasons: Mermaid forces a web view regardless; Shiki runs on the web side with no native module; and one renderer serves the app, the website, and any later native app.
+Render the card body in **one long-lived web view** that receives the next card as a prop, so web-view start-up is paid once per session, not per card. Grade buttons, navigation, and the rest of the UI stay native. Reasons: Mermaid forces a web view regardless; Shiki runs on the web side with no native module; and one renderer serves the app, the website (doc 08), the card preview inside Claude or ChatGPT through MCP Apps (doc 07), and the card view of a later native app.
 
 The spike (one session, before the review screen): render 50 real cards (long Java, a Mermaid sequence diagram, a cloze in code) on a mid-range Android phone and an iPhone, and measure first paint after cold start, card-to-card time, memory, and scrolling feel. Pass: card-to-card under 100 ms, first card under 1 s after the app opens, no jank scrolling a 15-line code block. If B fails, fall back to C.
 
@@ -259,10 +260,12 @@ uplink/
 ├── packages/
 │   ├── format/        doc 05 parser, schema, item expansion (shared: app, CLI, web)
 │   ├── scheduler/     the Scheduler interface over ts-fsrs (doc 02)
-│   └── card-render/   the web card renderer (option B; reused by the website)
+│   ├── card-render/   the web card renderer (option B; reused by the website)
+│   └── mcp-tools/     MCP tool handlers over DeckStore (stage 3, doc 07)
 ├── apps/
 │   ├── mobile/        the React Native app
-│   └── cli/           uplink check (doc 05)
+│   ├── cli/           uplink check (doc 05)
+│   └── mcp/           @uplink/mcp stdio server (stage 3, doc 07)
 └── decks/demo/        the seeded demo deck
 ```
 

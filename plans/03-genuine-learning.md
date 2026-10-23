@@ -1,6 +1,6 @@
 # 03 · Genuine learning vs rote memorisation
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -24,7 +24,7 @@ Uplink has to answer two questions before the card format (doc 05) is fixed:
 
 ## Non-goals
 
-- The exact card syntax (doc 05). Examples here use a provisional shape.
+- The exact card syntax (doc 05). Examples here follow it, leaving out `id`, which writers may omit.
 - The practice-to-cards pipeline (doc 04), beyond what it implies for card types.
 - Automatic grading of free-text answers by an LLM (listed under Later).
 
@@ -91,7 +91,7 @@ Each type is defined by what the learner has to *do*, not by layout. All types s
 
 Not in v1: multiple choice (recognition is easier than recall and trains the wrong response), image occlusion, audio. Audio is the first thing Spanish needs and goes under Later.
 
-### Examples (provisional shape; doc 05 owns the syntax)
+### Examples (doc 05 format)
 
 A `predict` card that cannot be answered by memorising a name:
 
@@ -103,7 +103,7 @@ tags: [java, strings, equality]
 ---
 What does this print, and why?
 
-```java
+```java run
 String a = "uplink";
 String b = new String("uplink");
 String c = b.intern();
@@ -111,7 +111,10 @@ System.out.println((a == b) + " " + (a == c) + " " + a.equals(b));
 ```
 
 ---
-`false true true`
+
+```output
+false true true
+```
 
 - `a` is a string literal, so it lives in the string pool.
 - `new String(...)` always makes a new object, so `a == b` compares two different references.

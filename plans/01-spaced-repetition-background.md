@@ -1,6 +1,6 @@
 # 01 · Spaced repetition background
 
-Status: draft · Updated: 2026-10-22
+Status: done · Updated: 2026-10-22
 
 ## Summary
 
@@ -258,7 +258,7 @@ Doc 02 turns this into a recommendation.
 
 - Should the app show R, S and D to learners, or only to curious ones (a "why is this due?" sheet)?
 - Do code and system-design cards behave like the vocabulary and medical cards the benchmark measured? Our own review logs will be the only way to know.
-- Is Anki's four-button scale right for understanding-type cards (doc 03), or would two buttons (fail/pass) be more honest? FSRS supports both (Hard and Easy are simply never pressed).
+- Is Anki's four-button scale right for understanding-type cards, or would two buttons (fail/pass) be more honest? FSRS supports both (Hard and Easy are simply never pressed). Doc 03 recommends two by default.
 
 ## Sources
 
