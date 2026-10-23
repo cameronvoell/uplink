@@ -184,7 +184,7 @@ Every "decision needed" in docs 01–08, in the order they block work. Recommend
 | D2 | Card ID scheme | 05 | ULID · shorter random ID | ULID | 1.1 |
 | D3 | Scheduler implementation | 02 | `ts-fsrs` library · own FSRS-6 core tested against it | Library | 1.4 |
 | D4 | Default grade buttons | 03 | Two (Again/Good) · four | Two, four as a setting | 1.4 (confirm) |
-| D5 | Expo or bare React Native | 06 | Expo with CNG · bare | Laid out for a person to decide, no recommendation | 2.1 |
+| D5 | Expo or bare React Native | 06 | Expo with CNG · bare | Expo, a lean rather than a firm call (see [doc 00](00-start-here.md#decisions-to-make)) | 2.1 |
 | D6 | Card rendering | 06 | B (one web view) · C (native, web view for diagrams) | B, decided by the spike's numbers | 2.0 |
 | D7 | Auth provider | 08 | WorkOS AuthKit · Better Auth | AuthKit | 4.0 |
 

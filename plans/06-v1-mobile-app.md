@@ -252,6 +252,7 @@ Notes for the decision:
 - Expo with CNG is not a lock-in: `prebuild` produces ordinary native projects that can be checked in at any time, which turns the app into a bare app with Expo modules.
 - The share sheet, the Shiki native engine (option A), and `op-sqlite` all need a development build on Expo; Expo Go alone will not cover v1's Should list.
 - A later native rewrite reads the same SQLite schema and the same deck format either way; the choice here affects build and upgrade cost, not the migration.
+- Lean: Expo, because it is cheaper to upgrade and can be turned into a bare app later. The argument for bare is visible native build work. See [doc 00](00-start-here.md#decisions-to-make).
 
 ## Project layout
 
