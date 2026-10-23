@@ -4,7 +4,9 @@ Status: done · Updated: 2026-10-22
 
 ## Summary
 
-Five stages, each finished and demoable before the next starts: (1) the card format, checker, and scheduler as plain TypeScript packages; (2) the React Native app; (3) a local MCP server, the "I know kung fu" demo; (4) accounts, sync, the website, and the hosted MCP server; (5) a native Android app, then optionally iOS. Each stage opens with a spike that retires its largest risk. Seven decisions are open. Three of them (positioning, IDs, Expo or bare) block early milestones and should be made first.
+Five stages, each demoable before the next: (1) format, checker, scheduler; (2) React Native app; (3) local MCP, "I know kung fu"; (4) accounts, sync, website, hosted MCP; (5) native Android, then optionally iOS.
+About 78 one-hour sessions in all; stages 1–3 (about 37) need no server. Each stage opens with a spike that retires its largest risk and ends with a five-minute demo.
+Seven decisions are open; positioning, card IDs, and the scheduler library block stage 1, and Expo or bare blocks stage 2.
 
 ## Problem
 
@@ -49,15 +51,15 @@ flowchart LR
   S2 --> S3["Stage 3<br/>Local MCP<br/>'I know kung fu'"]
   S3 --> S4["Stage 4<br/>Accounts · sync ·<br/>website · hosted MCP"]
   S4 --> S5["Stage 5<br/>Native Android<br/>(then iOS, optional)"]
-  D1{{"Decide: positioning,<br/>IDs, FSRS lib vs own"}} -.-> S1
-  D2{{"Decide: Expo vs bare"}} -.-> S2
-  SP2{{"Spike: rendering<br/>B or C"}} -.-> S2
-  D4{{"Decide: AuthKit vs<br/>Better Auth"}} -.-> S4
+  D13{{"D1–D3: positioning,<br/>IDs, FSRS lib vs own"}} -.-> S1
+  D5{{"D5: Expo vs bare"}} -.-> S2
+  D6{{"D6: rendering B or C<br/>(spike 2.0)"}} -.-> S2
+  D7{{"D7: AuthKit vs<br/>Better Auth"}} -.-> S4
 ```
 
 Session counts are estimates for AI-assisted sessions of about an hour, including review and tests. Re-estimate after stage 1 using its actual counts.
 
-### Stage 1 · Format, checker, scheduler (docs 01, 02, 03, 05, 07)
+### Stage 1 · Format, checker, scheduler (docs 01–05, 07)
 
 Goal: a deck of cards in a git repo that a machine can validate and schedule, and that an agent can write correctly.
 
@@ -75,7 +77,7 @@ Goal: a deck of cards in a git repo that a machine can validate and schedule, an
 
 ### Stage 2 · React Native app (docs 02, 03, 06)
 
-Goal: a learner reviews due cards on a phone, offline, with code and diagrams that look right, and gets new cards from their agent within a minute.
+Goal: a learner reviews due cards on a phone, offline, with code and diagrams that look right, and gets new cards from their agent as soon as the phone pulls the deck.
 
 | # | Milestone | Done when | Sessions |
 |---|---|---|---|
@@ -92,7 +94,7 @@ Goal: a learner reviews due cards on a phone, offline, with code and diagrams th
 
 ### Stage 3 · Local MCP server (doc 07)
 
-Goal: "I know kung fu". A learner names what they want to learn, their agent writes the cards through Uplink's tools, and the cards are on the phone a minute later.
+Goal: "I know kung fu". A learner names what they want to learn, their agent writes the cards through Uplink's tools, and the cards are on the phone at the next pull.
 
 | # | Milestone | Done when | Sessions |
 |---|---|---|---|
@@ -113,14 +115,14 @@ Goal: progress follows the learner across devices, and a chat assistant on the w
 |---|---|---|---|
 | 4.0 | Auth spike | Decision D7 made; a test MCP client completes OAuth (PRM, PKCE, resource indicator, CIMD) against the chosen provider | 2 |
 | 4.1 | Service, schema, API skeleton | TypeScript service, Postgres schema from doc 08, `/v1` with OpenAPI from Zod, generated client, row-level security | 4 |
-| 4.2 | Sync | `POST /v1/sync`; union of review events, tombstone undo, HLC last-writer-wins; v1 data migrates with cursor 0; multi-device convergence property test | 4 |
-| 4.3 | App sign-in and sync | System-browser PKCE sign-in; background sync; "no account" mode still works | 2 |
+| 4.2 | Sync | `POST /v1/sync`; union of review events, tombstone undo, HLC last-writer-wins; a cursor that never skips an in-flight row; v1 data migrates with cursor 0; convergence property test with concurrent writers | 4 |
+| 4.3 | App sign-in and sync | System-browser PKCE sign-in; sync on open, on pull-to-refresh, and after a session; "no account" mode still works | 2 |
 | 4.4 | Website core | Deck list, deck page, card editor with live validation, import, export, delete, all on `packages/card-render` | 5 |
 | 4.5 | Hosted MCP | `/mcp` with `ServiceDeckStore`, scopes, rate limits, connected-clients page | 3 |
 | 4.6 | GitHub mirror | GitHub App, webhook, import worker | 2 |
 | 4.7 | Publish, follow, fork | Public deck pages, server-rendered and cacheable | 3 |
 
-**Demo (five minutes).** On the phone, in the Claude app, using a connector added on the web: debrief a mock interview by voice and say "propose cards for the two things I got wrong". The cards appear in the Uplink app's inbox. Keep them, review one, open the website on a laptop, and show the same review in the history.
+**Demo (five minutes).** On the phone, in the Claude app, using a connector added on the web: debrief a mock interview by voice and say "propose cards for the two things I got wrong". Open the Uplink app; it syncs and the cards are in the inbox. Keep them, review one, open the website on a laptop, and show the same review in the history.
 
 Hosting this stage publicly is a decision for a person when the stage is ready. It brings real costs: a domain, a database, an auth provider account, and responsibility for other people's data.
 
@@ -133,7 +135,7 @@ Goal: the same product as a Kotlin app, with a migration log that records every 
 | 5.0 | Migration plan | Its own doc: rewrite in one go vs screen by screen inside the React Native app (brownfield), and what is reused | 1 |
 | 5.1 | Kotlin scheduler | FSRS-6 core ported (doc 01's forty lines plus learning steps and fuzz) and passing the same golden vectors as `packages/scheduler` | 2 |
 | 5.2 | Kotlin format parser | Passes the same fixture suite as `packages/format` | 3 |
-| 5.3 | Storage | Room over the same SQLite schema; a v1 database opens unchanged | 2 |
+| 5.3 | Storage | Room over doc 06's SQLite schema; an existing database opens with no data changes. Room validates the schema on open, so the entities must match doc 06's columns exactly (unverified until tried) | 2 |
 | 5.4 | Review screen in Compose | Native UI, with card bodies in a WebView running `packages/card-render` (doc 06 option B pays off here) | 4 |
 | 5.5 | Import and inbox | Paste, files, GitHub, account sync | 4 |
 
@@ -141,11 +143,11 @@ Goal: the same product as a Kotlin app, with a migration log that records every 
 
 Notes found while planning this stage:
 
-- **No permissive Kotlin FSRS library was found.** The open-spaced-repetition list includes a Kotlin FSRS-6 scheduler and an older FSRS-4 Android one. A Kotlin Multiplatform FSRS-6 library on Maven Central is GPL-3.0, which would force GPL terms on an app that links it. Porting the FSRS-6 core and testing it against golden vectors is a known two-session task (doc 02 sized the same work for TypeScript). Check the licence of each listed port before adopting one.
-- **Card rendering is the hardest part of a native rewrite**, as it was in React Native. Compose has markdown renderers and highlight.js-based code highlighting, but Mermaid needs a web view on any platform. Reusing `packages/card-render` in a WebView keeps cards identical across apps. A fully native renderer is a later, optional step.
+- **No permissive Kotlin FSRS library was found** (checked 2026-10-22). awesome-fsrs lists `FSRS-Kotlin` (FSRS-6), but its repo has no licence, so it cannot be reused without permission; `android-fsrs` is FSRS-4. `fsrskt` 1.0.1 on Maven Central (Kotlin Multiplatform, FSRS-6) is GPL-3.0, which would force GPL terms on an app that links it. Porting the FSRS-6 core and testing it against golden vectors is about two sessions (doc 02 sizes the same work for TypeScript).
+- **Card rendering is the hardest part of a native rewrite**, as it was in React Native. Compose has markdown renderers (`compose-markdown`, MIT, wraps a `TextView`) and Highlight.js-based code highlighting (`compose-highlight`, MIT), but Mermaid needs a web view on any platform. Reusing `packages/card-render` in a WebView keeps cards identical across apps. A fully native renderer is a later, optional step.
 - Google's guidance for moving to Compose is incremental: new screens in Compose, shared components extracted, one screen replaced at a time. Whether that applies to a React Native host (native screens inside the RN app) or argues for a clean rewrite is 5.0's question.
 
-iOS (SwiftUI) follows the same pattern only if Android has shown the migration story is worth telling twice. There is an open-spaced-repetition Swift port at FSRS-5; check it before porting.
+iOS (SwiftUI) follows the same pattern only if Android has shown the migration story is worth telling twice. `swift-fsrs` (MIT) is listed at FSRS-5; several apps on the awesome-fsrs list ship their own Swift FSRS-6 ports, so porting is the likely route there too.
 
 ## Totals
 
@@ -169,6 +171,7 @@ Stages 1–3 are about 37 sessions and need no server, no accounts, and no money
 | Agent-written cards stay on the surface (term ↔ definition) | 1–3 | High | Medium | Card guide with types and lenses; cards from the learner's own mistakes (doc 03); measure deletion rate per type |
 | MCP spec, SDK, or host support moves (SDK v2 is young and changed license at 2.3.0; ChatGPT availability unclear) | 3–4 | High | Medium | Thin wrapper over the SDK; local first; paste stays a supported path (doc 07) |
 | Stage 4 scope swallows the project | 4 | High | High | Stages 1–3 are complete without it; 4.0–4.3 (sync) deliver value before the website |
+| Sync skips or double-applies rows under concurrent writes | 4 | Medium | High | Cursor ordered by commit, idempotent push, convergence test with concurrent writers (doc 08) |
 | Owning an OAuth server or user data badly | 4 | Medium | High | Hosted auth recommended (doc 08); no public launch without a person's decision; export and delete from day one |
 | Expo SDK or React Native upgrades break native modules | 2, 5 | Medium | Low | Few native dependencies; Expo modules; pin SDK per stage |
 | FSRS-7 changes the `ts-fsrs` API | Any | High | Low | Own `Scheduler` interface; review log lets `replay` recompute (doc 02) |
@@ -213,7 +216,10 @@ Two more choices are not in the table because they are not engineering decisions
 ## Sources
 
 - Docs 01–08 in this folder: every decision, requirement, and open question collected here.
+External sources checked 2026-10-22.
+
 - open-spaced-repetition, awesome-fsrs (implementations by language and FSRS version). https://github.com/open-spaced-repetition/awesome-fsrs
+- GitHub API: `FSRS-Kotlin` (no licence), `swift-fsrs` (MIT). https://github.com/open-spaced-repetition/FSRS-Kotlin ; https://github.com/open-spaced-repetition/swift-fsrs
 - Maven Central, `one.felsen.fsrskt:fsrskt` 1.0.1 (Kotlin Multiplatform FSRS-6, GPL-3.0). https://central.sonatype.com/artifact/one.felsen.fsrskt/fsrskt
 - Android Developers, "Migrating to Jetpack Compose" codelab (incremental, screen-by-screen migration). https://developer.android.com/codelabs/jetpack-compose-migration
 - compose-markdown (TextView-based markdown in Compose) and compose-highlight (highlight.js-based code highlighting for Compose). https://github.com/jeziellago/compose-markdown ; https://central.sonatype.com/artifact/dev.hossain/compose-highlight
