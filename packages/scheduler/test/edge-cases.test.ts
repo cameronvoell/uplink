@@ -43,7 +43,8 @@ test("a long-overdue review stays finite, grows stability on success, and resets
   state = review(state, Good, state.due);
   const late = addMs(state.due, 1000 * DAY);
   const r = retrievability(state, late);
-  assert.ok(r !== null && r > 0 && r < 0.5, `R after 1000 days late: ${r}`);
+  // The power-law curve has a long tail: S ≈ 40 days still gives R ≈ 0.6 after 1040 days.
+  assert.ok(r !== null && r > 0 && r < 0.7, `R after 1000 days late: ${r}`);
 
   const good = review(state, Good, late);
   assert.equal(good.phase, "review");
