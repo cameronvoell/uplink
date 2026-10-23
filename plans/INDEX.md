@@ -11,7 +11,7 @@ Product-requirements docs for Uplink, written before any app code. Each doc is o
 | 05 | [Card format](05-card-format.md) | One markdown file per card (`---` splits sides), ULID `id` in frontmatter, Anki cloze, `run`/`output` code fences, Mermaid; review state only on device. Eight examples. | draft | 2026-10-22 |
 | 06 | [v1 mobile app (React Native)](06-v1-mobile-app.md) | Offline, single-user: GitHub/files/paste/share import, SQLite with insert-only review log, card body in one long-lived web view (spike-gated), Expo vs bare laid out for decision. | draft | 2026-10-22 |
 | 07 | [Getting LLM-made cards into the app](07-llm-cards-into-the-app.md) | v1: paste, files, git, and an Agent Skill; stage 3: local stdio MCP; v2: the same tools hosted with OAuth (MCP 2026-07-28). Agents only propose into the to-review inbox. | draft | 2026-10-22 |
-| 08 | Website and backend (v2) | Accounts, sync, sharing; typed API, services, Postgres, auth, conflicts. | planned | |
+| 08 | [Website and backend (v2)](08-website-and-backend.md) | One TypeScript service sharing the app's packages, REST + OpenAPI (argued over GraphQL), Postgres, custom sync (union-merged review log, LWW fields), AuthKit vs Better Auth, publish/follow/fork. | draft | 2026-10-22 |
 | 09 | Roadmap | Stages, milestones, demos, risks, open decisions. | planned | |
 
 Order follows the dependency chain: scheduler background and choice first, then what the cards should teach, then the format, then the app, then distribution and the roadmap.
