@@ -42,16 +42,16 @@ Uplink has to answer two questions before the card format (doc 05) is fixed:
 
 | Finding | Strength | What it means for Uplink |
 |---|---|---|
-| **Retrieval practice** beats restudy. Meta-analyses report about g = 0.50 (Rowland 2014, 159 effects) and g = 0.61 (Adesope et al. 2017, 272 effects), larger with feedback. | Strong; rated "high utility" by Dunlosky et al. 2013. | Every card is a question first, answer second. Always show the answer after the attempt (feedback). |
+| **Retrieval practice** beats restudy. Meta-analyses report about g = 0.50 (Rowland 2014) and g = 0.61 (Adesope et al. 2017). Effect counts (159, 272) and "larger with feedback" are from secondary summaries, unverified. | Strong; rated "high utility" by Dunlosky et al. 2013. | Every card is a question first, answer second. Always show the answer after the attempt (feedback). |
 | **Spacing** beats massing across ages and materials. | Strong; also "high utility". | The scheduler (docs 01–02). |
 | **Transfer** of retrieval practice to new questions is real but conditional: d = 0.40 overall (Pan & Rickard 2018, 192 effects), strongest for application and inference questions, and dependent on three moderators: the final test asks for the same *kind* of response, retrieval practice is elaborated, and initial performance is high. After correcting for publication bias, transfer often vanished when none of the three was present. Transfer to *untested* material was weakest. | Strong, and the most important row for this doc. | Recall cards mostly improve recall of those cards. To transfer, cards must ask for the response the learner will need later (explain, apply, predict), include an elaborated answer, and be answerable most of the time. A deck only teaches what is on it. |
-| **Question type should match the goal.** Higher-order and mixed quizzes improved higher-order test performance; fact-only quizzes did not (Agarwal 2019). | Moderate–strong; classroom and lab. | "Learn the facts first, then think" is not a reason to delay understanding cards. Mix both from day one. |
+| **Question type should match the goal.** Higher-order and mixed quizzes improved higher-order test performance; fact-only quizzes did not (Agarwal 2019). | Moderate; classroom and lab, with practice and final questions close in form. | "Learn the facts first, then think" is not a reason to delay understanding cards. Mix both from day one. |
 | **Retrieval beats elaborative study** (concept mapping) on delayed tests, including inference questions (Karpicke & Blunt 2011). Repeated testing beat restudy on new inferential questions a week later (Butler 2010; replicated). | Strong. | Reading a good explanation is not enough; the explanation becomes a card. |
 | **Elaborative interrogation and self-explanation** ("why is this true?", "how does this step follow?") help. | Moderate; Dunlosky et al. rate both "moderate utility". | The explain-why card type, and a short "why" under every answer. |
-| **Interleaving** helps with a moderate overall effect (g = 0.42; Brunmair & Richter 2019), most for visually similar categories, less for maths, and **blocking beat interleaving for word lists**. The benefit grows when categories are similar to each other and varied inside. | Moderate, with clear moderators. | Interleave where the learner must *tell similar things apart* (which algorithm? ser or estar?). Do not force it on vocabulary. Rohrer & Taylor 2007 show the pattern well: mixed practice looked worse during practice and won a week later. |
+| **Interleaving** helps with a moderate overall effect (g = 0.42; Brunmair & Richter 2019), most for paintings and other visual material, less for maths, and **blocking beat interleaving for word learning**. The benefit grows when categories are similar to each other and varied inside. | Moderate, with clear moderators. | Interleave where the learner must *tell similar things apart* (which algorithm? ser or estar?). Do not force it on vocabulary. Rohrer & Taylor 2007 show the pattern well: mixed practice looked worse during practice and won a week later. |
 | **Desirable difficulties**: spacing, interleaving, testing, and varied practice slow apparent progress and improve retention. A difficulty is undesirable when the learner lacks the background to respond (Bjork & Bjork 2011). | Strong as a framework. | Make cards effortful but tractable. Repeated failure is a signal to split or rewrite the card, not to try harder. |
-| **Erroneous examples** (find, explain, and fix someone else's error) beat plain problem solving on a delayed test in one study (d = 0.62; Adams, McLaren et al. 2014) and did not in another classroom study. Students liked them less. | Mixed. | Find-the-bug is worth a card type, with a clear expected answer and an explanation, not as the main diet. |
-| **Novice programmers** are often weak at tracing and predicting code before they are weak at problem solving (Lister et al. 2004, multi-national, 500+ students). | Moderate; a much-cited CS education study. | Predict-the-output cards train a prerequisite skill that problem-solving drills skip. |
+| **Erroneous examples** (find, explain, and fix someone else's error) beat problem solving with feedback on a one-week delayed test in one study (208 middle-school students, d = 0.62; Adams, McLaren et al. 2014) and did not in another classroom study. Students liked them less. | Mixed. | Find-the-bug is worth a card type, with a clear expected answer and an explanation, not as the main diet. |
+| **Novice programmers** are often weak at tracing and predicting code before they are weak at problem solving (Lister et al. 2004, a multi-national working group; "over 500 students" per a secondary summary). | Moderate; a much-cited CS education study, descriptive rather than an experiment. | Predict-the-output cards train a prerequisite skill that problem-solving drills skip. |
 
 Two practitioner sources fill in what the papers do not say about writing cards:
 
@@ -59,16 +59,6 @@ Two practitioner sources fill in what the papers do not say about writing cards:
 - **Matuschak's guide to prompts**: good prompts are focused, precise, consistent, tractable, and effortful. Conceptual understanding comes from asking about a concept through several *lenses*: attributes, similarities and differences, parts and wholes, causes and effects, significance. Long, oddly worded prompts and copy-pasted cloze deletions invite *pattern matching*: answering from the shape of the question. His notes also observe that LLMs write term ↔ definition prompts for conceptual material unless told exactly which kinds of prompt to write.
 
 ### Where rote comes from, concretely
-
-```mermaid
-flowchart TD
-  A["Card asks for a string<br/>(name, definition, trick)"] --> B["Learner recalls<br/>the string"]
-  B --> C{"Next encounter<br/>looks the same?"}
-  C -- yes --> D["Looks like mastery"]
-  C -- no --> E["No transfer:<br/>the card was learned,<br/>the idea was not"]
-  F["Card asks for a use of the idea<br/>(predict, explain, choose, fix)"] --> G["Learner reconstructs<br/>the idea each time"]
-  G --> H["Transfers to new phrasings<br/>(application, inference)"]
-```
 
 Rote is not a property of flashcards. It is a property of a card whose answer can be produced without the idea. "What is the time complexity of binary search?" can be answered by a parrot. "This loop halves `hi - lo` each iteration; how many iterations for n = 1,000,000, and why?" cannot.
 
@@ -122,6 +112,8 @@ false true true
 - `equals` compares contents.
 ````
 
+Output traced by hand, not executed; `uplink check` will run it (doc 05).
+
 A `choose` card, written to discriminate between patterns rather than to name one:
 
 ````markdown
@@ -141,7 +133,7 @@ Sliding window, or prefix sums with a hash map? Why?
 - O(n) time, O(n) space.
 ````
 
-The same idea seen through two more lenses would be a `bug` card (a sliding-window solution that fails on `[1, -1, 1]`, k = 1) and an `explain` card ("why does the hash map start with `{0: 1}`?"). Three small cards on one idea is redundancy Wozniak welcomes; it is also how the idea survives a rephrased question.
+The same idea seen through two more lenses would be a `bug` card (a sliding-window solution that returns 2 on `[1, -1, 1]`, k = 1, where the answer is 3) and an `explain` card ("why does the hash map start with `{0: 1}`?"). Three small cards on one idea is redundancy Wozniak welcomes; it is also how the idea survives a rephrased question.
 
 A Spanish `choose` card, the same card type in a different domain:
 
@@ -242,12 +234,12 @@ Verdict: usable for reading-and-writing Spanish in v1, missing audio. That is a 
 ## Sources
 
 - Dunlosky, Rawson, Marsh, Nathan & Willingham (2013), "Improving students' learning with effective learning techniques", *Psychological Science in the Public Interest* 14(1). Summary: https://www.psychologicalscience.org/news/releases/which-study-strategies-make-the-grade.html
-- Rowland (2014), "The effect of testing versus restudy on retention", *Psychological Bulletin* 140(6); Adesope, Trevisan & Sundararajan (2017), "Rethinking the use of tests", *Review of Educational Research* 87(3). Effect sizes as reported in secondary summaries; not checked against the papers. https://education.wsu.edu/documents/2018/01/rethinking-use-tests.pdf/
-- Pan & Rickard (2018), "Transfer of test-enhanced learning: Meta-analytic review and synthesis", *Psychological Bulletin* 144(7), doi:10.1037/bul0000151. Abstract via Semantic Scholar. https://api.semanticscholar.org/graph/v1/paper/DOI:10.1037/bul0000151?fields=title,abstract
+- Rowland (2014), "The effect of testing versus restudy on retention", *Psychological Bulletin* 140(6); Adesope, Trevisan & Sundararajan (2017), "Rethinking the use of tests", *Review of Educational Research* 87(3). The g range 0.50–0.61 re-checked 2026-10-22 in a 2018 review in *Frontiers in Psychology*. https://education.wsu.edu/documents/2018/01/rethinking-use-tests.pdf/ ; https://www.frontiersin.org/articles/10.3389/fpsyg.2018.02412/full
+- Pan & Rickard (2018), "Transfer of test-enhanced learning: Meta-analytic review and synthesis", *Psychological Bulletin* 144(7), doi:10.1037/bul0000151 (192 effects, 122 experiments; abstract re-checked 2026-10-22 via Europe PMC). https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:10.1037/bul0000151&resultType=core
 - Agarwal (2019), "Retrieval practice & Bloom's taxonomy", *Journal of Educational Psychology* 111(2). https://www.learningscientists.org/blog/2019/6/27-1
 - Karpicke & Blunt (2011), "Retrieval practice produces more learning than elaborative studying with concept mapping", *Science* 331. https://www.purdue.edu/newsroom/research/2011/110120KarpickeScience.html
 - Butler (2010), "Repeated testing produces superior transfer of learning relative to repeated studying", *JEP: LMC*. https://profiles.wustl.edu/en/publications/repeated-testing-produces-superior-transfer-of-learning-relative-/ ; replication record: https://forrt.org/flora-replication-atlas/doi/10.1037/a0019902/
-- Brunmair & Richter (2019), "Similarity matters: A meta-analysis of interleaved learning and its moderators", *Psychological Bulletin*, doi:10.1037/bul0000209. https://www.psychologie.uni-wuerzburg.de/fileadmin/06020400/2019/Brunmair_Richter_in_press__2019_META-ANALYSIS_OF_INTERLEAVED_LEARNING.pdf
+- Brunmair & Richter (2019), "Similarity matters: A meta-analysis of interleaved learning and its moderators", *Psychological Bulletin*, doi:10.1037/bul0000209 (59 studies; abstract re-checked 2026-10-22 via Europe PMC). https://www.psychologie.uni-wuerzburg.de/fileadmin/06020400/2019/Brunmair_Richter_in_press__2019_META-ANALYSIS_OF_INTERLEAVED_LEARNING.pdf
 - Rohrer & Taylor (2007), "The shuffling of mathematics problems improves learning", *Instructional Science*. https://www.gwern.net/doc/psychology/spaced-repetition/2007-rohrer.pdf
 - Bjork & Bjork (2011), "Making things hard on yourself, but in a good way: Creating desirable difficulties to enhance learning". https://bjorklab.psych.ucla.edu/wp-content/uploads/sites/13/2016/04/EBjork_RBjork_2011.pdf
 - Adams, McLaren et al. (2014), erroneous examples in decimals, and a non-replicating classroom study. https://www.learningscientists.org/blog/2023/7/27 ; https://www.dfki.de/web/forschung/projekte-publikationen/publikation/8598
