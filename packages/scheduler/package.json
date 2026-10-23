@@ -1,0 +1,15 @@
+{
+  "name": "@uplink/scheduler",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FSRS-6 spaced-repetition scheduler: pure functions, no dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.ts\""
+  }
+}
