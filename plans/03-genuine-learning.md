@@ -158,8 +158,7 @@ Doc 02 left this open. Recommendation: **Again / Good by default; Hard and Easy 
 
 - Self-grading an explanation is already noisy; four options add a judgement that the evidence does not show helps.
 - Key-point answers turn grading into a yes/no question: did I get every point?
-- FSRS works with any subset of its four grades, so the choice is reversible and costs nothing in the scheduler.
-- Learners coming from Anki can switch to four buttons.
+- FSRS works with any subset of its four grades, so the choice is reversible and costs nothing in the scheduler; learners coming from Anki can switch to four.
 
 ## Interleaving and session order
 
