@@ -4,13 +4,13 @@ Status: draft · Updated: 2026-10-26
 
 ## Summary
 
-Stage 5's Kotlin app should be unidirectional data flow: one immutable `ReviewUiState`, a sealed `ReviewUiEvent`, and a pure `reduce` in a plain-Kotlin domain module beside the FSRS-6 port and the format parser, with a `ViewModel` running the loop and appending to the review log.
+Stage 5's Kotlin app should be unidirectional data flow: one immutable `ReviewUiState`, a sealed `ReviewUiEvent`, and a pure `reduce` in a plain-Kotlin domain module beside the FSRS-6 port and the format parser; a `ViewModel` runs the loop and appends to the review log.
 Storage is Room 3 over doc 06's schema, dependency injection is a hand-written container, navigation is Navigation 3, and the card body stays in a `WebView` behind a `CardRenderer` interface.
 Versions were checked on 2026-10-26. Appendix A's reducer compiles and runs; appendix B's Compose snippets are illustrative and were not compiled.
 
 ## Problem
 
-Doc 09 puts a native Android app at stage 5 with a migration plan (5.0) but no architecture. A Compose app can be organised half a dozen ways, and the choice decides how the review session, the review log, import, and the renderer are cut up. The earlier docs fix the constraints: a pure scheduler (doc 02), an append-only log with undo as a tombstone (docs 02, 06), review state never in card files (doc 05), and a web-view renderer if the spike passes (doc 06). This doc derives the architecture from those constraints and from what Compose requires.
+Doc 09 puts a native Android app at stage 5 with a migration plan (5.0) but no architecture, and a Compose app can be organised half a dozen ways. The earlier docs fix the constraints: a pure scheduler (doc 02), an append-only log with undo as a tombstone (docs 02, 06), review state never in card files (doc 05), and a web-view renderer if the spike passes (doc 06). This doc derives the architecture from those constraints and from what Compose requires.
 
 ## Goals and non-goals
 
@@ -19,25 +19,25 @@ Doc 09 puts a native Android app at stage 5 with a migration plan (5.0) but no a
 
 ## Compose facts that shape architecture
 
-**Declarative UI.** A composable is a function from state to UI: "In Compose the UI is immutable—there's no way to update it after it's been drawn. What you can control is the state of your UI." Architecture is about where state lives and who may change it.
+**Declarative UI.** A composable is a function from state to UI: "In Compose the UI is immutable—there's no way to update it after it's been drawn. What you can control is the state of your UI." So architecture is about where state lives and who may change it.
 
-**Recomposition and skipping.** Compose re-runs the composables that read a changed `State` and skips one "if all the inputs are stable and haven't changed". A `data class` of `val` fields of stable types is stable; `var` fields, `List`, `Map`, and classes from modules without the Compose compiler are not. Strong skipping, the default since Kotlin 2.0.20, skips unstable parameters on instance equality and memoises lambdas. So UI state is an immutable data class, and a new instance means a real change.
+**Recomposition and skipping.** Compose re-runs the composables that read a changed `State` and skips one "if all the inputs are stable and haven't changed". A `data class` of `val` fields of stable types is stable; `var` fields, `List`, `Map`, and classes from modules without the Compose compiler are not. Strong skipping, the default since Kotlin 2.0.20, skips unstable parameters on instance equality and memoises lambdas. UI state is therefore an immutable data class, and a new instance means a real change.
 
 **Hoisting and state holders.** "The state goes down, and events go up." Hoist state to the lowest common ancestor of its readers and writers: screen state in a `ViewModel`, which survives activity recreation; element state in the composable or a plain class with the UI's lifetime. Never pass a `ViewModel` into a plain state holder.
 
 **`remember` vs `rememberSaveable`.** `remember` survives recomposition; `rememberSaveable` also survives activity and process recreation through saved instance state. What must outlive a rotation goes there or in the `ViewModel`; what must outlive the process goes in SQLite, which for a session is the log itself.
 
-**Side effects.** `LaunchedEffect` runs a coroutine while the composable is in the composition and restarts it when its keys change: a snackbar from state, or leaving the screen when `finished` turns true. `DisposableEffect` is for cleanup. `snapshotFlow` turns `State` into a cold `Flow`. `SideEffect` pushes Compose state into objects Compose does not manage.
+**Side effects.** `LaunchedEffect` runs a coroutine while the composable is in the composition and restarts it when its keys change: a snackbar from state, or leaving the screen when `finished` turns true. `DisposableEffect` is for cleanup, `snapshotFlow` turns `State` into a cold `Flow`, and `SideEffect` pushes Compose state into objects Compose does not manage.
 
-**`AndroidView` interop.** `factory` creates the `View`; `update` runs on inflation and whenever state it reads changes; a lazy-list overload adds `onReset` and `onRelease`. There is no Compose `WebView`, so doc 06's option B is an `AndroidView`, and the WebView guidance adds: it leaks unless destroyed when it leaves the composition, saves history in a `Bundle`, and "nesting it with `LazyColumn` does not currently work properly". One `WebView` per review screen, created in `factory`, fed by `update`, never inside a lazy list.
+**`AndroidView` interop.** `factory` creates the `View`; `update` runs on inflation and whenever state it reads changes; a lazy-list overload adds `onReset` and `onRelease`. There is no Compose `WebView`, so doc 06's option B is an `AndroidView`, with the documented constraints: destroy it when it leaves the composition or it leaks, save its history in a `Bundle`, and never nest it in a `LazyColumn`. One `WebView` per review screen, created in `factory`, fed by `update`.
 
 ## Unidirectional data flow, as Android documents it
 
 Android names two mandatory layers and one optional one. The **UI layer** is composables plus state holders. The **data layer** is repositories over data sources: it owns business logic, exposes immutable data and `Flow`s, is main-safe, and offline-first "a local data source—such as a database—is the recommended source of truth". The **domain layer** holds use cases and "is optional because not all apps have these requirements. Use it only when needed".
 
-UDF is "the pattern where the state flows down and the events flow up": the `ViewModel` holds and exposes state, the UI sends events, the `ViewModel` updates the state, the UI renders it. UI state is an immutable `data class` named *functionality* + `UiState`, one per screen, exposed as a `StateFlow` and collected with `collectAsStateWithLifecycle()`. "Business logic must always be applied before UI logic."
+UDF is "the pattern where the state flows down and the events flow up": the `ViewModel` holds and exposes state, the UI sends events, the `ViewModel` updates the state, the UI renders it. UI state is an immutable `data class` named *functionality* + `UiState`, one per screen, exposed as a `StateFlow` and collected with `collectAsStateWithLifecycle()`.
 
-On one-shot effects the guidance is firm: "ViewModel events should always result in a UI state update." Channels and other event streams from a `ViewModel` "don't guarantee the delivery and processing of those events" when the producer outlives the consumer. So a message is a field, `userMessage: String?`, shown by the UI in `LaunchedEffect(userMessage)`, which then tells the `ViewModel` it was shown. Navigation driven by business state is state the UI observes; navigation from a button is a callback the caller supplies.
+On one-shot effects the guidance is firm: "ViewModel events should always result in a UI state update." Channels and other event streams from a `ViewModel` "don't guarantee the delivery and processing of those events" when the producer outlives the consumer. So a message is a field, `userMessage: String?`, shown by the UI in `LaunchedEffect(userMessage)`, which then tells the `ViewModel` it was shown; navigation driven by business state is likewise state the UI observes.
 
 ## The pattern family
 
@@ -46,26 +46,26 @@ On one-shot effects the guidance is firm: "ViewModel events should always result
 | **MVVM as Android practises it** (Now in Android) | A `ViewModel` per screen combines repository `Flow`s with `stateIn` into a `UiState`, "a sealed hierarchy using interfaces and immutable data classes"; actions are method calls | The default; transitions spread over methods. Fine for the deck and inbox screens, loose for a state machine |
 | **MVI** | One immutable model, sealed intents, a reducer. Staltz (2015): functions between event streams; Dorfmann (2017): state split across business logic, presenter, and view is what lets a screen contradict itself | Natural for the review session; effects come back from the reducer as data. No library needed |
 | **Redux-style store** | One store for the app; "the only way to change the state is to emit an action"; pure reducers | More than four screens need; one store per screen is MVI |
-| **Clean Architecture** | Entities, use cases, adapters, frameworks; "source code dependencies can only point inwards" | Keep the rule, not the rings: a domain module with no Android imports. Use-case classes would be pass-throughs |
+| **Clean Architecture** | Entities, use cases, adapters, frameworks; "source code dependencies can only point inwards" | Keep the rule, not the rings: a domain module with no Android imports |
 | **Presenter as composable** | Circuit 0.39.0 (2026-09-15, pre-1.0): a `Presenter` composable returns state, a `Ui` composable takes it; they "can only communicate through state and event emissions". Molecule 2.2.0 (2025-09-24): `launchMolecule` turns a composable into a `StateFlow` | The reducer idea with better async ergonomics, at the price of a framework. Over-tooling for one real screen; Molecule is the upgrade path |
 
 **Storage.** Room 3.0.3 (2026-09-09) is a Kotlin Multiplatform rewrite in the `androidx.room3` package: Kotlin-only, KSP-only, `suspend` DAOs and `Flow`, a `SQLiteDriver`; Room 2.x (2.8.5) "enters maintenance mode" per the March 2026 announcement. SQLDelight 2.4.1 (2026-10-06) is SQL-first: `.sq` files generate typesafe Kotlin, it "verifies your schema, statements, and migrations at compile-time", and `asFlow` notifies of change; also multiplatform. The difference for stage 5 is schema ownership: Room derives the schema from entities and validates the database on open (doc 09, 5.3; unverified for Room 3); SQLDelight takes doc 06's schema as written.
 
-**Dependency injection.** Hilt (Dagger 2.60.1, 2026-07-06) is Android's recommended library: compile-time graphs, `@HiltViewModel`, Android only. Koin 4.2.2 (2026-06-15) resolves at runtime and is multiplatform. Metro 1.5.0 (2026-10-26) is a multiplatform compiler-plugin framework that "draws heavy inspiration from Dagger, Anvil, and Kotlin-Inject". Manual DI is a container in `Application` with factories; Android warns the boilerplate "can be error-prone" as an app grows and recommends Hilt "when possible".
+**Dependency injection.** Hilt (Dagger 2.60.1, 2026-07-06) is Android's recommended library: compile-time graphs, `@HiltViewModel`, Android only. Koin 4.2.2 (2026-06-15) resolves at runtime and is multiplatform. Metro 1.5.0 (2026-10-26) is a multiplatform compiler-plugin framework in the Dagger, Anvil, and kotlin-inject line. Manual DI is a container in `Application` with factories; Android warns the boilerplate "can be error-prone" as an app grows and recommends Hilt "when possible".
 
 **Navigation.** Navigation 3 1.2.0 is stable (2026-09-23): the back stack is a list of serialisable keys you own, `NavDisplay` renders it, and the runtime is multiplatform. Navigation 2 (2.10.2) "is in maintenance mode and will only receive critical fixes".
 
-**Platform.** Compose BOM 2026.09.00 maps to Compose 1.12.1 and Material 3 1.4.0 (1.13.0-beta02 on 2026-10-21); the Compose compiler ships with Kotlin, now 2.4.21 (2026-10-08); Lifecycle 2.11.0 (2026-06-17) has `ViewModel`-Compose on every multiplatform target; Compose Multiplatform 1.12.2 (2026-10-15) is stable on Android, iOS, and desktop, beta on Wasm.
+**Platform.** Compose BOM 2026.09.00 (Compose 1.12.1, Material 3 1.4.0); Kotlin 2.4.21 (2026-10-08), which ships the Compose compiler; Lifecycle 2.11.0 (2026-06-17), with `ViewModel`-Compose on every multiplatform target; Compose Multiplatform 1.12.2 (2026-10-15), stable on Android, iOS, and desktop, beta on Wasm.
 
 ## What this means for Uplink
 
-**The review session is a state machine.** Due items are filtered and shuffled once a day (doc 06); then front, reveal, grade with two buttons by default (D4), next card, and undo of the last grade as a tombstone. The screen is `queue`, `position`, `face`, scheduler state per item, `lastAnswer`, and `userMessage`; four events cover it: `Reveal`, `Answer`, `UndoLast`, `MessageShown`. A reducer states the machine in forty lines (appendix A), and a JVM test walks every path without Android.
+**The review session is a state machine.** Due items are filtered and shuffled once a day (doc 06); then front, reveal, grade with two buttons by default (D4), next card, and undo of the last grade as a tombstone. Four events cover it (`Reveal`, `Answer`, `UndoLast`, `MessageShown`), a reducer states the machine in forty lines (appendix A), and a JVM test walks every path without Android.
 
 **The scheduler is pure, so it is domain code.** `packages/scheduler` is `review(state, grade, now)` with no clock or randomness, returning state only; the app makes the log event. The Kotlin port (5.1) keeps that shape behind a `Scheduler` interface, passes the same py-fsrs golden vectors as JVM tests, and is a parameter of `reduce`.
 
-**The review log is an event store.** State on the device only (doc 05), `review_event` insert-only with `undoes` (doc 06), and `replay(log)` rebuilding `item_state`: that is Fowler's event sourcing, "capture all changes to an application state as a sequence of events", with `item_state` as the cache. The reducer's effects are exactly the two writes, `AppendLog` and `CacheState`, and a replay test checks them.
+**The review log is an event store.** State on the device only (doc 05), `review_event` insert-only with `undoes` (doc 06), and `replay(log)` rebuilding `item_state`: that is Fowler's event sourcing, "capture all changes to an application state as a sequence of events", with `item_state` as the cache. The reducer's effects are exactly those two writes, `AppendLog` and `CacheState`.
 
-**Import is data-layer work.** Doc 06's four paths are data sources behind one `CardRepository`; the parser is the Kotlin port of `packages/format` (5.2), pure Kotlin, on the same fixtures. The UI sees `Flow<List<CardSummary>>`, never markdown.
+**Import is data-layer work.** Doc 06's four paths are data sources behind one `CardRepository`; the parser is the Kotlin port of `packages/format` (5.2), pure Kotlin, on the same fixtures. The UI never sees markdown.
 
 **The renderer sits behind an interface.** `CardRenderer` has one composable, `Card(view, face, modifier)`; the first implementation wraps a `WebView` running the bundled `packages/card-render`, and a native one can replace it without touching the session.
 
@@ -81,7 +81,7 @@ On one-shot effects the guidance is firm: "ViewModel events should always result
 
 **Dependency injection: manual.** An `AppContainer` built in `Application` and a `ViewModelProvider.Factory`. Why: six objects, one scope, no annotation processing; Hilt or Metro once the graph passes about ten bindings or needs a second scope.
 
-**Navigation: Navigation 3** with `rememberNavBackStack` and serialisable keys (`Home`, `Review`, `Inbox`, `Deck`, `CardDetail`, `AddDeck`). Why: the back stack is state we own, and Navigation 2 is in maintenance mode.
+**Navigation: Navigation 3** with `rememberNavBackStack` and serialisable keys. Why: the back stack is state we own, and Navigation 2 is in maintenance mode.
 
 ```mermaid
 flowchart LR
@@ -113,7 +113,7 @@ flowchart LR
 
 ## Open questions
 
-- **Storage, 5.3.** Room 3 is the lean; whether Room 3 validates an existing database's schema on open is unverified. Proposal: 5.3 opens with a thirty-minute test against a database the React Native app wrote; if it fails, SQLDelight takes doc 06's schema verbatim. **Decision needed at 5.3.**
+- **Storage, 5.3.** Whether Room 3 validates an existing database's schema on open is unverified. Proposal: 5.3 opens with a thirty-minute test against a database the React Native app wrote; if it fails, SQLDelight takes doc 06's schema verbatim. **Decision needed at 5.3.**
 - **Renderer, D6 and 5.4.** If spike 2.0 picks option C (native text, web view for diagrams), `CardRenderer` still holds, but 5.4 would need a native markdown renderer sooner. Proposal: 5.4 ships the `WebView` renderer regardless, so both apps render cards identically for the stage 5 demo.
 - **Domain module as Kotlin Multiplatform, 5.1 and 5.2.** JVM-only costs nothing; a multiplatform module adds the plugin and build time before a second platform exists. Proposal: JVM-only, converted when iOS starts (doc 09's "iOS optional").
 - **The same reducer in the React Native app, 2.3.** Both apps could share the state, events, and reducer shape, and session transcripts as test vectors. It adds a small `packages/session` to doc 06's layout: a roadmap change proposed here, not made.
