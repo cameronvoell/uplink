@@ -183,11 +183,11 @@ Every "decision needed" in docs 01–08, in the order they block work. Recommend
 
 | # | Decision | Doc | Options | Recommendation | Needed by |
 |---|---|---|---|---|---|
-| D1 | Positioning | 03 | A: general tool, technical first · B: interview-prep tool | A | 1.5 (guide) and 1.6 (seed decks) |
-| D2 | Card ID scheme | 05 | ULID · shorter random ID | ULID | 1.1 |
-| D3 | Scheduler implementation | 02 | `ts-fsrs` library · own FSRS-6 core tested against it | Library | 1.4 |
+| D1 | Positioning | 03 | A: general tool, technical first · B: interview-prep tool | **Decided 2026-10-28: A** (technical first; language learning later) | 1.5 (guide) and 1.6 (seed decks) |
+| D2 | Card ID scheme | 05 | ULID · shorter random ID | **Decided 2026-10-28: ULID**, assigned by `uplink check --fix` | 1.1 |
+| D3 | Scheduler implementation | 02 | `ts-fsrs` library · own FSRS-6 core tested against it | **Decided 2026-10-28: library**, behind our `Scheduler` interface | 1.4 |
 | D4 | Default grade buttons | 03 | Two (Again/Good) · four | Two, four as a setting | 1.4 (confirm) |
-| D5 | Expo or bare React Native | 06 | Expo with CNG · bare | Expo, a lean rather than a firm call (see [doc 00](00-start-here.md#decisions-to-make)) | 2.1 |
+| D5 | Expo or bare React Native | 06 | Expo with CNG · bare | **Decided 2026-10-28: Expo**, builds both local and EAS, Android and iOS | 2.1 |
 | D6 | Card rendering | 06 | B (one web view) · C (native, web view for diagrams) | B, decided by the spike's numbers | 2.0 |
 | D7 | Auth provider | 08 | WorkOS AuthKit · Better Auth | AuthKit | 4.0 |
 

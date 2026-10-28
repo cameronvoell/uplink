@@ -228,7 +228,7 @@ Verdict: usable for reading-and-writing Spanish in v1, missing audio. That is a 
 - Is two buttons the right default for people coming from Anki? Watch whether learners switch.
 - Should `choose` cards always show the option list, or sometimes ask the learner to name the approach unprompted? The second is harder and closer to an interview; the first is more tractable.
 - How strict should "to review" be: block study until reviewed, or allow "trust this deck"?
-- Positioning is a product decision. **Decision needed**: Option A (recommended) or Option B.
+- Positioning is a product decision. **Decided 2026-10-28: Option A**, technical topics first, with room for language learning later (D1).
 
 ## Sources
 

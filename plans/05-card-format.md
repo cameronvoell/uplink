@@ -240,7 +240,7 @@ Reasons: decks are shared and often public, and a learner's lapses are private; 
 
 ## Open questions
 
-- ULIDs are 26 characters of noise in every file. A shorter random ID (10–12 base32 characters) is enough for one learner's decks; ULIDs are safer once decks are shared and merged. Proposal: ULID. **Decision needed.**
+- ULIDs are 26 characters of noise in every file. A shorter random ID (10–12 base32 characters) is enough for one learner's decks; ULIDs are safer once decks are shared and merged. **Decided 2026-10-28: ULID** (D2). Writers may omit `id`; `uplink check --fix` assigns it.
 - Write IDs back into files, or always keep a path → id map? Writing back survives renames but means modifying the learner's repo. Proposal: write back via the CLI or the learner's agent; the app keeps a map for decks it cannot write.
 - `language` carries two meanings (natural or programming). Two fields would be cleaner, but doc 03 argues for one domain-free field. Keep one unless it causes real confusion.
 - How strict is the 50-character line guideline? Revisit once the app's code view exists (doc 06).

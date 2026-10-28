@@ -171,7 +171,7 @@ FSRS measures elapsed time in days; the app must decide when a day ends. Proposa
 
 ## Open questions
 
-- Use the library, or write our own FSRS-6 core tested against it? The library is the default here. Writing our own costs a day or two and teaches the model in depth; the risk sits in scheduling policy (learning steps, fuzz), not in the forty lines of maths. **Decision needed.**
+- Use the library, or write our own FSRS-6 core tested against it? The library is the default here. Writing our own costs a day or two and teaches the model in depth; the risk sits in scheduling policy (learning steps, fuzz), not in the forty lines of maths. **Decided 2026-10-28: the library** behind our `Scheduler` interface (D3); the own core is kept on a separate branch for cross-checks.
 - Should a learner see retrievability on every card, or only in the "why" sheet?
 - What threshold, measured how, should gate server-side fitting?
 

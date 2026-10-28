@@ -130,7 +130,7 @@ The spike (one session, before the review screen): render 50 real cards (long Ja
 
 ## Expo or bare React Native
 
-Both are viable for v1. **Decision needed** (D5 in [doc 00](00-start-here.md#decisions-to-make)). The React Native docs recommend starting new apps with a framework and name Expo; bare React Native is still supported.
+Both are viable for v1. **Decided 2026-10-28: Expo with CNG** (D5 in [doc 00](00-start-here.md#decisions-to-make)). The React Native docs recommend starting new apps with a framework and name Expo; bare React Native is still supported.
 
 | | Expo (Continuous Native Generation) | Bare React Native (Community CLI) |
 |---|---|---|
@@ -189,7 +189,7 @@ uplink/
 
 ## Open questions
 
-- **Expo or bare React Native.** Decision needed (above).
+- **Expo or bare React Native.** Decided 2026-10-28: Expo. Builds must work both locally and on EAS, for Android and iOS.
 - Rendering B or C: decided by the spike's numbers, not taste.
 - Should the inbox block a deck's new cards until triaged? Proposal: no; "keep all" is one tap and the inbox count shows on Home.
 - New cards a day: 10 is Anki-like, but agent-written cards arrive in bursts of 5–30. Proposal: cards with a `source` from the last 48 hours bypass the limit.
